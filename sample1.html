@@ -7,19 +7,26 @@
 
     <p id="text"></p>
     <script>
-        const socket = new WebSocket('ws://localhost:1000');
+        const socket = new WebSocket('ws://localhost:1000')
 
-        // Connection opened
+        socket.addEventListener("close", function (event) {
+            console.log('Socked closed ', JSON.stringify(event))
+        })
+
+        socket.addEventListener("error", function (event) {
+            console.log('Socked error ', JSON.stringify(event))
+        })
+
         socket.addEventListener('open', function (event) {
-            console.log('Socked connected', event);
+            console.log('Socked connected', event)
             document.getElementById("text").innerText += "socket connected " + JSON.stringify(event) + "\n"
-        });
+        })
 
-        // Listen for messages
         socket.addEventListener('message', async function (event) {
-            document.getElementById("text").innerText += await event.data.text()
-            console.log('Message from server ', event.data);
-        });
+            let result = await event.data.text()
+            document.getElementById("text").innerText += result
+            console.log('Message from server ', result)
+        })
 
         function sendMsg() {
             socket.send(document.getElementById("msg").value + "\n")

@@ -12,6 +12,10 @@
 
 - websocket proxy https://github.com/novnc/websockify-js
 
+# manuals
+
+- https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+
 # TODO
 
 - https://github.com/jershell/simple-jsonrpc-js

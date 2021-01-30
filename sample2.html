@@ -10,20 +10,26 @@
 
     <p id="text"></p>
     <script>
-        const socket = new WebSocket('ws://localhost:1000');
+        const socket = new WebSocket('ws://localhost:1000')
 
-        // Connection opened
+        socket.addEventListener("close", function (event) {
+            console.log('Socked closed ', JSON.stringify(event))
+        })
+
+        socket.addEventListener("error", function (event) {
+            console.log('Socked error ', JSON.stringify(event))
+        })
+
         socket.addEventListener('open', function (event) {
-            console.log('Socked connected', event);
-            socket.send("/get\n")
-        });
+            console.log('Socked connected', event)
+            socket.send("/get\n") // request initial count
+        })
 
-        // Listen for messages
         socket.addEventListener('message', async function (event) {
             let result = await event.data.text()
             document.getElementById("text").innerText = "counter: " + result
-            console.log('Message from server ', result);
-        });
+            console.log('Message from server ', result)
+        })
 
         function inc(value) {
             socket.send(`/inc/${value}\n`)
