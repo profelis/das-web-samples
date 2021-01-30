@@ -64,14 +64,14 @@ class WebServer : Server
                 let str = string(current_string)
                 var found = false
                 for i, re in iter_range(regexps), regexps
-                    let match = re |> regex_match(str, 0)
+                    let match = re |> regex_match(str)
                     if match < 0
                         continue
                     found = true
                     var args: array<string>
-                    for gr in re.groups
-                        if gr._0.x < gr._0.y
-                            args |> push <| slice(str, gr._0.x, gr._0.y)
+                    for gr,x in re.groups, range(length(re.groups)-1)
+                        let grp = regex_group(re, x+1, str)
+                        args |> push(grp)
                     let res = invoke(handlers[i], str, args)
                     self->sendStr(res)
                     break
