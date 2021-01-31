@@ -1,0 +1,50 @@
+<html>
+
+<body>
+
+    <input type="button" onclick="reqImage()" value="Get Image"></input>
+
+    <div id="img"></div>
+    <script src="./simple-jsonprc-js.js"></script>
+    <script>
+        //configure
+        var jrpc = new simple_jsonrpc()
+        var socket = new WebSocket("ws://localhost:1000")
+
+        socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
+        jrpc.toStream = _msg => socket.send(_msg)
+
+        socket.onerror = error => console.error("Error: " + error.message)
+
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                console.info('Connection close was clean')
+            } else {
+                console.error('Connection suddenly close')
+            }
+            console.info('close code : ' + event.code + ' reason: ' + event.reason)
+        }
+
+        socket.onopen = function () {
+            // jrpc.call('sum', [22, 32]).then(function (result) {
+            //     document.getElementById("text").innerText += "sum call result: " + result + "\n"
+            //     console.log(result)
+            // })
+        }
+
+        function reqUpdateTitle() {
+            jrpc.notification('reqUpdateTitle')
+        }
+        function reqImage() {
+            jrpc.call('reqImage').then((data) => {
+                document.getElementById("img").innerHTML += `<img src="data:image/bmp;base64,${data}" /><br/>\n`
+                console.log(data)
+            })
+        }
+    </script>
+
+
+
+</body>
+
+</html>

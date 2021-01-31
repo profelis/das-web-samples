@@ -20,6 +20,6 @@ def main (fn:string)
         jsonRpc->addCall("sum", new LambdaRpcCall(sumHandler))
 
         jsonRpc->listen(server)
-        jsonRpc->lsitedUnhandled(server)
+        jsonRpc->listenUnhandled(server)
         return server
     return true

@@ -87,7 +87,7 @@ class JsonRpcHandler
         server->on(self->matchPtr()) <| @(msg: string; args: array<string>)
             return self->rpcHandler(msg)
 
-    def lsitedUnhandled(var server: WebServer?): void
+    def listenUnhandled(var server: WebServer?): void
         server->unhandled() <| @(msg: string; args: array<string>)
             var res = self->getError("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, double(0))
             let str = write_json(res)
