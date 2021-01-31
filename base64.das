@@ -71,18 +71,18 @@ def base64 ( var inp : iterator<int>; linewidth = 76 )
             yield c
         return false
 
+
+[private]
 def iter8to32(var inp : iterator<uint8&>)
     return <- generator<int> [[<-inp]] () <|
         for i in inp
             yield int(i)
         return false
 
-def base64 ( var inp : iterator<uint8&>; linewidth = 76 )
-    return <- generator<int> [[<-inp]] () <|
-        var lb <- iter8to32(inp) |> chunk6() |> xlat() |> pad4() |> linebreak(linewidth)
-        for c in lb
-            yield c
-        return false
+
+def base64 ( var inp: iterator<uint8&>; linewidth = 76 )
+    return <- base64(iter8to32(inp), linewidth)
+
 
 def to_string(it : iterator<int>) : string
     return build_string() <| $(str)

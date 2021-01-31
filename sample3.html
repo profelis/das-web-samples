@@ -8,7 +8,6 @@
     <p id="text"></p>
     <script src="./simple-jsonprc-js.js"></script>
     <script>
-        //configure
         var jrpc = new simple_jsonrpc()
         var socket = new WebSocket("ws://localhost:1000")
 
@@ -17,17 +16,11 @@
             document.getElementById("text").innerText += "on setTitle notification: " + title + "\n"
         })
 
-        socket.onmessage = async function (event) {
-            jrpc.messageHandler(await event.data.text())
-        }
+        socket.onmessage = async event=> jrpc.messageHandler(await event.data.text())
 
-        jrpc.toStream = function (_msg) {
-            socket.send(_msg)
-        }
+        jrpc.toStream = _msg => socket.send(_msg)
 
-        socket.onerror = function (error) {
-            console.error("Error: " + error.message)
-        }
+        socket.onerror = error => console.error("Error: " + error.message)
 
         socket.onclose = function (event) {
             if (event.wasClean) {
@@ -38,8 +31,6 @@
             console.info('close code : ' + event.code + ' reason: ' + event.reason)
         }
 
-        //usage
-        //after connect
         socket.onopen = function () {
 
             //calls
