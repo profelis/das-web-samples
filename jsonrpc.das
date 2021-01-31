@@ -4,127 +4,111 @@ require daslib/json
 require daslib/json_boost
 
 
-class JsonRpcMatch : Matcher
-    js : JsonValue? = null
-    id : double = double(0f)
-    method: string = ""
-    params: JsonValue?
-
-    def override match(str: string): MatchResult
-        params = null
-        delete js
-
-        if find(str, "\"jsonrpc\"") < 0
-            return <- [[MatchResult invalid = null]]
-
-        var error: string
-        js = read_json(str, error)
-        if js == null
-            return <- [[MatchResult invalid = null]]
-
-        if js is _array
-            // TODO: batch request, return [[MatchResult more = null]]
-            print("unsuppported batch request")
-            return <- [[MatchResult invalid = null]]
-        
-        if js is _object
-            var success = true
-            id = double(0.)
-            (js as _object) |> find_if_exists("id") <| $(ptr)
-                if *ptr.value is _number
-                    id = *ptr.value as _number
-                elif *ptr.value is _string
-                    id = double(to_int(*ptr.value as _string))
-                else
-                    success = false
-
-            method = ""
-            (js as _object) |> find_if_exists("method") <| $(ptr)
-                if *ptr.value is _string
-                    method = *ptr.value as _string
-                else
-                    success = false
-
-            (js as _object) |> find_if_exists("params") <| $(ptr)
-                if (*ptr.value is _array) || (*ptr.value is _object)
-                    params = *ptr
-                else
-                    success = false
-
-            if success
-                return <- [[MatchResult args <- [{ auto[] str }] ]] 
-        return <- [[MatchResult invalid = null]]
-
 class RpcCall
-    def abstract call(params:JsonValue?; id:double): void
+    def abstract call(var params:RpcParams; id:double): void
 
 class RpcNotification
-    def abstract call(params:JsonValue?): void
+    def abstract call(var params:RpcParams): void
 
-class NoArgsRpcCall : RpcCall
-    fn: lambda<(id: double):void>
-    def NoArgsRpcCall(var f: lambda<(id: double):void>)
+
+class LambdaRpcCall : RpcCall
+    fn: lambda<(var params: RpcParams; id: double):void>
+    def LambdaRpcCall(var f: lambda<(var params: RpcParams; id: double):void>)
         fn <- f
 
-    [unused_argument(params)] def override call(params:JsonValue?; id:double): void
-        invoke(fn, id)
+    def override call(var params: RpcParams; id:double): void
+        invoke(fn, params, id)
 
-class NoArgsRpcNotification : RpcNotification
-    fn: lambda<():void>
-    def NoArgsRpcNotification(var f: lambda<():void>)
+class LambdaRpcNotification : RpcNotification
+    fn: lambda<(var params: RpcParams):void>
+    def LambdaRpcNotification(var f: lambda<(var params: RpcParams):void>)
         fn <- f
 
-    [unused_argument(params)] def override call(params:JsonValue?): void
-        invoke(fn)
+    def override call(var params: RpcParams): void
+        invoke(fn, params)
 
-class JsonRpcHandler
-    match: JsonRpcMatch <- JsonRpcMatch()
-    calls: table<string; RpcCall?>
-    notifications: table<string; RpcNotification? -const>
 
-    [private] def matchPtr()
-        unsafe
-            return addr(match)
+class RpcParams
+    params: JsonValue?
+    num : int = 0
+    def set(data: JsonValue?)
+        params = data
+        num = 0
+        if params != null
+            if params is _array
+                num = length(params as _array)
+            elif params is _object
+                num = length(params as _object)
 
-    def listen(var server: WebServer?): void
-        server->on(self->matchPtr()) <| @(msg: string; args: array<string>)
-            return self->rpcHandler(msg)
+    def getArgN(idx: int): JsonValue?
+        if idx >= num
+            return null
+        
+        if params is _array
+            return (params as _array)[idx]
+        return null
 
-    [unused_argument(msg)] def rpcHandler(msg: string): string
-        var found = false
-        if match.id == double(0f)
-            notifications |> find_for_edit_if_exists(match.method) <| $(ptr)
-                found = true
-                (**ptr)->call(match.params)
-        else
-            calls |> find_for_edit_if_exists(match.method) <| $(ptr)
-                found = true
-                (**ptr)->call(match.params, match.id)
-        if !found
-            var res = self->getError("Method not found", double(-32601), match.id)
-            let str = write_json(res)
-            delete res
-            return str
+    def getArg(name: string): JsonValue?
+        if params is _object
+            return (params as _object)[name]
+        return null
+
+
+def asBool(js: JsonValue?): bool
+    if js == null
+        return false
+    if js is _bool
+        return js as _bool
+    if js is _number
+        return (js as _number) != double(0)
+    if js is _string
+        return to_int(js as _string) != 0
+    return js is _object || js is _array
+
+def asString(js: JsonValue?): string
+    if js == null
         return ""
+    if js is _string
+        return js as _string
+    if js is _bool
+        return js as _bool ? "true" : "false"
+    if js is _number
+        return string(float(js as _number))
+    return js is _object ? "[Object object]" : js is _array ? "[Array array]" : ""
 
-    def addCall(name:string; var call: RpcCall? implicit)
-        calls[name] <- call
 
-    def addNotification(name:string; var notification: RpcNotification? implicit)
-        notifications[name] <- notification
+def asDouble(js: JsonValue?): double
+    if js == null
+        return double(0)
+    if js is _number
+        return js as _number
+    if js is _bool
+        return js as _bool ? double(1f) : double(0f)
+    if js is _string
+        return double(to_float(js as _string))
+    
+    return double(0)
 
-    def sendResponce(var server: WebServer?; msg: string; id: double)
-        var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => JV(msg) }})
-        server->sendStr(write_json(res))
-        delete res
+def asFloat(js: JsonValue?): float
+    if js == null
+        return 0f
+    if js is _number
+        return float(js as _number)
+    if js is _bool
+        return js as _bool ? 1f : 0f
+    if js is _string
+        return to_float(js as _string)
+    
+    return 0f
 
-    def getError(error: string; code: double; id: double): JsonValue?
-        var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
-        if id != double(0f)
-            (res.value as _object)["id"] = JV(id)
-        return res
-
-    def sendError(var server: WebServer?; error: string; code: double; id: double)
-        var res = self->getError(error, code, id)
-        server->sendStr(write_json(res))
-        delete res
+def asInt(js: JsonValue?): int
+    if js == null
+        return 0
+    if js is _number
+        return int(js as _number)
+    if js is _bool
+        return js as _bool ? 1 : 0
+    if js is _string
+        return to_int(js as _string)
+    
+    return 0
