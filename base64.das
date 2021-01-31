@@ -83,3 +83,8 @@ def base64 ( var inp : iterator<uint8&>; linewidth = 76 )
         for c in lb
             yield c
         return false
+
+def to_string(it : iterator<int>) : string
+    return build_string() <| $(str)
+        for i in it
+            str |> write(to_char(i))

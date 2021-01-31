@@ -28,38 +28,14 @@ def main (fn:string)
             save_BMP("foo.bmp", w, h, arr)
             fopen("foo.bmp", "rb+") <| $(file)
                 let size = int(fstat(file).size)
-                print("file size: {size}\n")
                 fload(file, size) <| $(data:array<uint8>)
-                    print("content len {length(data)}\n")
                     unsafe
                         let base <- base64(each(data))
-                        var str = build_string() <| $(s)
-                            for b in base
-                                s |> write(to_char(b))
-                        // print(str)
-                        // print("\n")
-                        print("send image {size}\n")
-                        jsonRpc->sendResponse(server, str, id)
-                    // var str = build_string() <| $(s)
-                    //     for i in range(size)
-                    //         s |> write(data[i])
-                    
+                        jsonRpc->sendResponse(server, to_string(base), id)
 
-                    // print("data: {str}")
-                // let data = fread(file)
-                // print("data len {length(data)}\n")
-                // var base <- base64(data)
-                // resize(bytes, int(fstat(file).size))
-                // file |> fload(bytes)
-                // var str = build_string() <| $(s)
-                //     for i in base
-                //         s |> write(string(i))
-                // print(str)
-                // jsonRpc->sendResponse(server, "image data {str}", id)
         jsonRpc->addCall("reqImage", new LambdaRpcCall(sumHandler))
 
         jsonRpc->listen(server)
         jsonRpc->listenUnhandled(server)
         return server
     return true
-
