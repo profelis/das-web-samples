@@ -3,6 +3,7 @@
 <body>
 
     <input type="button" onclick="reqUpdateTitle()" value="Update title"></input>
+    <input type="button" onclick="sendUnknownCall()" value="Unknown call"></input>
 
     <p id="text"></p>
     <script src="./simple-jsonprc-js.js"></script>
@@ -60,6 +61,12 @@
 
         function reqUpdateTitle() {
             jrpc.notification('reqUpdateTitle')
+        }
+        function sendUnknownCall() {
+            jrpc.call('sendUnknownCall').catch(function (err) {
+                document.getElementById("text").innerText += "sendUnknownCall result: " + JSON.stringify(err) + "\n"
+                console.log(err)
+            })
         }
     </script>
 

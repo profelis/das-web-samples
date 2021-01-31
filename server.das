@@ -59,7 +59,7 @@ class WebServer : Server
     def onRegex(var re: Regex; var handler: Handler)
         self->on(new RegexMatch(re), handler)
 
-    def on(match: Matcher? implicit; var handler: Handler)
+    def on(var match: Matcher? implicit; var handler: Handler)
         matchers |> push(match)
         handlers |> emplace(handler)
 
@@ -96,7 +96,7 @@ class WebServer : Server
             if int(ch) == '\r'
                 continue
 
-            if int(ch) == '\n'
+            if int(ch) == '\n' && length(current_string) > 0
                 let str = string(current_string)
                 print("`{str}` length={length(current_string)}\n")
                 var found = false
@@ -125,6 +125,8 @@ class WebServer : Server
                 continue
             
             current_string |> push(ch)
+
+        if length(current_string) > 0
             var found = false
             let str = string(current_string)
             for matcher, idx in matchers, iter_range(matchers)
