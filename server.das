@@ -12,19 +12,55 @@ var
 
 typedef
     Handler = lambda<(message: string; args: array<string>): string>
+    MatchResult = variant<args: array<string>; invalid: void?; more: void?>
+
+class Matcher
+    def abstract match(str: string): MatchResult
+
+
+class StringMatch : Matcher
+    matchStr : string
+    def StringMatch(str: string)
+        matchStr = str
+    def override match(str: string): MatchResult
+        if str == matchStr 
+            return <- [[MatchResult args <- [{ auto[] str }] ]] 
+        return <- [[MatchResult invalid = null]]
+
+
+class RegexMatch : Matcher
+    matchRe : Regex
+    def RegexMatch(var re: Regex)
+        matchRe <- re
+    def override match(str: string): MatchResult
+        let res = matchRe |> regex_match(str)
+        if res < 0
+            return <- [[MatchResult invalid = null]]
+        var args: array<string>
+        for gr,x in matchRe.groups, range(length(matchRe.groups)-1)
+            let grp = regex_group(matchRe, x+1, str)
+            args |> push(grp)
+        return <- [[MatchResult args <- args ]] 
+
 
 class WebServer : Server
     current_string : array<uint8>
     done : bool = false
-    regexps: array<Regex>
+    matchers: array<Matcher?>
     handlers: array<Handler>
     unhandledHandler: Handler
 
     def WebServer
         Server`Server(cast<Server> self)
 
-    def on(var msg: Regex; var handler: Handler)
-        regexps |> emplace(msg)
+    def onStr(str: string; var handler: Handler)
+        self->on(new StringMatch(str), handler)
+
+    def onRegex(var re: Regex; var handler: Handler)
+        self->on(new RegexMatch(re), handler)
+
+    def on(match: Matcher? implicit; var handler: Handler)
+        matchers |> push(match)
         handlers |> emplace(handler)
 
     def unhandled(var handler: Handler)
@@ -59,28 +95,31 @@ class WebServer : Server
                 ch = msg[i]
             if int(ch) == '\r'
                 continue
-            elif int(ch) == '\n'
-                print("`{string(current_string)}` length={length(current_string)}\n")
+
+            if int(ch) == '\n'
                 let str = string(current_string)
+                print("`{str}` length={length(current_string)}\n")
                 var found = false
-                for i, re in iter_range(regexps), regexps
-                    let match = re |> regex_match(str)
-                    if match < 0
+                for matcher, idx in matchers, iter_range(matchers)
+                    let match <- matcher->match(str)
+                    if match is invalid
                         continue
+                    if match is more
+                        current_string |> push(ch)
+                        break
                     found = true
-                    var args: array<string>
-                    for gr,x in re.groups, range(length(re.groups)-1)
-                        let grp = regex_group(re, x+1, str)
-                        args |> push(grp)
-                    let res = invoke(handlers[i], str, args)
-                    self->sendStr(res)
+                    let res = invoke(handlers[idx], str, match as args)
+                    if length(res) > 0
+                        self->sendStr(res)
                     break
                 if !found && unhandledHandler != null
                     let res = invoke(unhandledHandler, str, [[array<string>]])
-                    self->sendStr(res)
+                    if length(res) > 0
+                        self->sendStr(res)
                 current_string |> clear()
-            else
-                current_string |> push(ch)
+                continue
+            
+            current_string |> push(ch)
 
 
 

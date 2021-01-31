@@ -1,0 +1,40 @@
+<html>
+
+<body>
+
+    <input id="msg" style="width: 800px;"></input>
+    <input type="button" onclick="sendMsg()"></input>
+
+    <p id="text"></p>
+    <script>
+        const socket = new WebSocket('ws://localhost:1000')
+
+        socket.addEventListener("close", function (event) {
+            console.log('Socked closed ', JSON.stringify(event))
+        })
+
+        socket.addEventListener("error", function (event) {
+            console.log('Socked error ', JSON.stringify(event))
+        })
+
+        socket.addEventListener('open', function (event) {
+            console.log('Socked connected', event)
+            document.getElementById("text").innerText += "socket connected " + JSON.stringify(event) + "\n"
+        })
+
+        socket.addEventListener('message', async function (event) {
+            let result = await event.data.text()
+            document.getElementById("text").innerText += result + "\n"
+            console.log('Message from server ', result)
+        })
+
+        function sendMsg() {
+            socket.send(document.getElementById("msg").value + "\n")
+        }
+    </script>
+
+
+
+</body>
+
+</html>

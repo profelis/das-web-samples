@@ -9,13 +9,13 @@ var counter = 0
 def main (fn:string)
     startServer(fn) <| $()
         var server = new WebServer()
-        server->on(%regex~\/inc/(.+)%%) <| @(msg: string; args: array<string>)
+        server->onRegex(%regex~\/inc/(.+)%%) <| @(msg: string; args: array<string>)
             counter += to_int(args[0])
             return "{counter}\n"
-        server->on(%regex~\/dec/(.+)$%%) <| @(msg: string; args: array<string>)
+        server->onRegex(%regex~\/dec/(.+)$%%) <| @(msg: string; args: array<string>)
             counter -= to_int(args[0])
             return "{counter}\n"
-        server->on(%regex~\/get$%%) <| @(msg: string; args: array<string>)
+        server->onStr("/get") <| @(msg: string; args: array<string>)
             return "{counter}\n"
         server->unhandled() <| @(msg: string; args: array<string>)
             return "{msg}: unhandled call. counter = {counter}\n"
