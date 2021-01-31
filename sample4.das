@@ -6,9 +6,6 @@ require bmp
 require fio
 require base64
 
-def fload(file:file; size: int; blk: block<(data: array<uint8>): void>)
-    _builtin_load(file, size, blk)
-
 [export]
 def main (fn:string)
     startServer(fn) <| $()
