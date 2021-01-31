@@ -100,26 +100,45 @@ class WebServer : Server
                 let str = string(current_string)
                 print("`{str}` length={length(current_string)}\n")
                 var found = false
+                var needMore = false
                 for matcher, idx in matchers, iter_range(matchers)
                     let match <- matcher->match(str)
                     if match is invalid
                         continue
                     if match is more
-                        current_string |> push(ch)
-                        break
+                        needMore = true
+                        continue
                     found = true
                     let res = invoke(handlers[idx], str, match as args)
                     if length(res) > 0
                         self->sendStr(res)
                     break
-                if !found && unhandledHandler != null
-                    let res = invoke(unhandledHandler, str, [[array<string>]])
-                    if length(res) > 0
-                        self->sendStr(res)
+                if !found
+                    if needMore // no matches, but somebody wants more
+                        current_string |> push(ch)
+                        continue
+                    if unhandledHandler != null
+                        let res = invoke(unhandledHandler, str, [[array<string>]])
+                        if length(res) > 0
+                            self->sendStr(res)
                 current_string |> clear()
                 continue
             
             current_string |> push(ch)
+            var found = false
+            let str = string(current_string)
+            for matcher, idx in matchers, iter_range(matchers)
+                let match <- matcher->match(str)
+                if match is invalid
+                    continue
+                if match is more
+                    continue
+                found = true
+                let res = invoke(handlers[idx], str, match as args)
+                if length(res) > 0
+                    self->sendStr(res)
+                current_string |> clear()
+                break
 
 
 

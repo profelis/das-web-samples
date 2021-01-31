@@ -4,6 +4,19 @@ require daslib/json
 require daslib/json_boost
 require jsonrpc public
 
+let
+    PARSE_ERROR_CODE = double(-32700)
+    INVALID_REQUEST_CODE = double(-32600)
+    METHOD_NOT_FOUND_CODE = double(-32601)
+    INVALID_PARAMS_CODE = double(-32602)
+    INTERNAL_ERROR_CODE = double(-32603)
+
+    PARSE_ERROR = "Parse error"
+    INVALID_REQUEST = "Invalid Request"
+    METHOD_NOT_FOUND = "Method not found"
+    INVALID_PARAMS = "Invalid params"
+    INTERNAL_ERROR = "Internal error"
+
 class JsonRpcMatch : Matcher
     js : JsonValue? = null
     id : double = double(0f)
@@ -15,6 +28,10 @@ class JsonRpcMatch : Matcher
         delete js
 
         if find(str, "\"jsonrpc\"") < 0
+            return <- [[MatchResult invalid = null]]
+
+        var s = strip(str)
+        if !ends_with(s, "}")
             return <- [[MatchResult invalid = null]]
 
         var error: string
@@ -58,7 +75,7 @@ class JsonRpcMatch : Matcher
 
 class JsonRpcHandler
     match: JsonRpcMatch <- JsonRpcMatch()
-    params: RpcParams = RpcParams()
+    rpcParams: RpcParams = RpcParams()
     calls: table<string; RpcCall?>
     notifications: table<string; RpcNotification? -const>
 
@@ -70,20 +87,27 @@ class JsonRpcHandler
         server->on(self->matchPtr()) <| @(msg: string; args: array<string>)
             return self->rpcHandler(msg)
 
+    def lsitedUnhandled(var server: WebServer?): void
+        server->unhandled() <| @(msg: string; args: array<string>)
+            var res = self->getError("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, double(0))
+            let str = write_json(res)
+            delete res
+            return str
+
     [unused_argument(msg)] def rpcHandler(msg: string): string
         var found = false
         if match.id == double(0f)
             notifications |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
-                params->set(match.params)
-                (**ptr)->call(params)
+                rpcParams->set(match.params)
+                (**ptr)->call(rpcParams)
         else
             calls |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
-                params->set(match.params)
-                (**ptr)->call(params, match.id)
+                rpcParams->set(match.params)
+                (**ptr)->call(rpcParams, match.id)
         if !found
-            var res = self->getError("Method not found", double(-32601), match.id)
+            var res = self->getError("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
             let str = write_json(res)
             delete res
             return str
@@ -95,9 +119,21 @@ class JsonRpcHandler
     def addNotification(name:string; var notification: RpcNotification? implicit)
         notifications[name] <- notification
 
-    def sendResponce(var server: WebServer?; msg: string; id: double)
+    def sendResponse(var server: WebServer?; msg: string; id: double)
         var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => JV(msg) }})
         server->sendStr(write_json(res))
+        delete res
+
+    def sendRequest(var server: WebServer?; method: string; params: JsonValue?; id: double)
+        var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
+        server->sendStr(write_json(res))
+        (res as _object) |> erase("params")
+        delete res
+
+    def sendNotification(var server: WebServer?; method: string; params: JsonValue?)
+        var res = JV({{ "jsonrpc" => JV("2.0"); "method" => JV(method); "params" => params }})
+        server->sendStr(write_json(res))
+        (res as _object) |> erase("params")
         delete res
 
     def getError(error: string; code: double; id: double): JsonValue?

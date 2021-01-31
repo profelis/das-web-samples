@@ -85,7 +85,7 @@ def asDouble(js: JsonValue?): double
     if js is _bool
         return js as _bool ? double(1f) : double(0f)
     if js is _string
-        return double(to_float(js as _string))
+        return double(double(js as _string))
     
     return double(0)
 
