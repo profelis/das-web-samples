@@ -7,7 +7,6 @@
 - `node websockify.js localhost:1000 localhost:9000`
 - open in browser `sample.html`
 
-
 # utils
 
 - websocket proxy https://github.com/novnc/websockify-js
@@ -17,7 +16,11 @@
 - https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
 - https://www.jsonrpc.org/specification
 
-# TODO
+# js json-rpc
 
 - https://github.com/jershell/simple-jsonrpc-js
 
+# Vue.js
+
+- https://vuejs.org/
+- https://github.com/DimanVorosh/vue-json-rpc-websocket
