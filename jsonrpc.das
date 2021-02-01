@@ -62,7 +62,7 @@ def asBool(js: JsonValue?): bool
     if js is _bool
         return js as _bool
     if js is _number
-        return (js as _number) != double(0)
+        return (js as _number) != 0lf
     if js is _string
         return to_int(js as _string) != 0
     return js is _object || js is _array
@@ -89,15 +89,15 @@ def asNumber(js: JsonValue?): double
 
 def asDouble(js: JsonValue?): double
     if js == null
-        return double(0)
+        return 0lf
     if js is _number
         return js as _number
     if js is _bool
-        return js as _bool ? double(1f) : double(0f)
+        return js as _bool ? 1lf : 0lf
     if js is _string
-        return double(double(js as _string))
+        return double(js as _string)
     
-    return double(0)
+    return 0lf
 
 def asFloat(js: JsonValue?): float
     if js == null

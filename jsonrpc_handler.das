@@ -5,11 +5,11 @@ require daslib/json_boost
 require jsonrpc public
 
 let
-    PARSE_ERROR_CODE = double(-32700)
-    INVALID_REQUEST_CODE = double(-32600)
-    METHOD_NOT_FOUND_CODE = double(-32601)
-    INVALID_PARAMS_CODE = double(-32602)
-    INTERNAL_ERROR_CODE = double(-32603)
+    PARSE_ERROR_CODE = -32700lf
+    INVALID_REQUEST_CODE = -32600lf
+    METHOD_NOT_FOUND_CODE = -32601lf
+    INVALID_PARAMS_CODE = -32602lf
+    INTERNAL_ERROR_CODE = -32603lf
 
     PARSE_ERROR = "Parse error"
     INVALID_REQUEST = "Invalid Request"
@@ -19,7 +19,7 @@ let
 
 class JsonRpcMatch : Matcher
     js : JsonValue? = null
-    id : double = double(0f)
+    id : double = 0lf
     method: string = ""
     params: JsonValue?
 
@@ -46,7 +46,7 @@ class JsonRpcMatch : Matcher
         
         if js is _object
             var success = true
-            id = double(0.)
+            id = 0lf
             (js as _object) |> find_if_exists("id") <| $(ptr)
                 if *ptr.value is _number
                     id = *ptr.value as _number
@@ -89,14 +89,14 @@ class JsonRpcHandler
 
     def listenUnhandled(var server: WebServer?): void
         server->unhandled() <| @(msg: string; args: array<string>)
-            var res = getError("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, double(0))
+            var res = getError("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, 0lf)
             let str = write_json(res)
             delete res
             return str
 
     [unused_argument(msg)] def rpcHandler(msg: string): string
         var found = false
-        if match.id == double(0f)
+        if match.id == 0lf
             notifications |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
                 rpcParams->set(match.params)
@@ -105,7 +105,8 @@ class JsonRpcHandler
             calls |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
                 rpcParams->set(match.params)
-                (**ptr)->call(rpcParams, match.id)
+                (**ptr).id = match.id
+                (**ptr)->call(rpcParams)
         if !found
             var res = getError("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
             let str = write_json(res)
@@ -138,7 +139,7 @@ def sendNotification(var server: WebServer?; method: string; params: JsonValue?)
 
 def getError(error: string; code: double; id: double): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
-    if id != double(0f)
+    if id != 0lf
         (res.value as _object)["id"] = JV(id)
     return res
 
