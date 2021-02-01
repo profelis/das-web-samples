@@ -69,7 +69,7 @@ class JsonRpcMatch : Matcher
                     success = false
 
             if success
-                return <- [[MatchResult args <- [{ auto[] str }] ]] 
+                return <- [[MatchResult args <- [{ string[] "" }] ]] 
         return <- [[MatchResult invalid = null]]
 
 
