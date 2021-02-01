@@ -3,13 +3,8 @@ require server
 require daslib/json
 require daslib/json_boost
 
-
 class RpcCall
-    def abstract call(var params: RpcParams; id:double): void
-
-class RpcNotification
-    def abstract call(var params: RpcParams): void
-
+    def abstract call(var params: RpcParams; id: double): void
 
 class LambdaRpcCall : RpcCall
     fn: lambda<(var params: RpcParams; id: double):void>
@@ -19,12 +14,13 @@ class LambdaRpcCall : RpcCall
     def override call(var params: RpcParams; id:double): void
         invoke(fn, params, id)
 
-class LambdaRpcNotification : RpcNotification
+
+class LambdaRpcNotification : RpcCall
     fn: lambda<(var params: RpcParams):void>
     def LambdaRpcNotification(var f: lambda<(var params: RpcParams):void>)
         fn <- f
 
-    def override call(var params: RpcParams): void
+    [unused_argument(id)] def override call(var params: RpcParams; id:double): void
         invoke(fn, params)
 
 

@@ -77,7 +77,7 @@ class JsonRpcHandler
     match: JsonRpcMatch <- JsonRpcMatch()
     rpcParams: RpcParams = RpcParams()
     calls: table<string; RpcCall?>
-    notifications: table<string; RpcNotification? -const>
+    notifications: table<string; RpcCall?>
 
     [private] def matchPtr()
         unsafe
@@ -100,24 +100,24 @@ class JsonRpcHandler
             notifications |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
                 rpcParams->set(match.params)
-                (**ptr)->call(rpcParams)
+                (**ptr)->call(rpcParams, 0lf)
         else
             calls |> find_for_edit_if_exists(match.method) <| $(ptr)
                 found = true
                 rpcParams->set(match.params)
-                (**ptr).id = match.id
-                (**ptr)->call(rpcParams)
-        if !found
-            var res = getError("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
-            let str = write_json(res)
-            delete res
-            return str
-        return ""
+                (**ptr)->call(rpcParams, match.id)
+        if found
+            return ""
+
+        var err = getError("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
+        let res = write_json(err)
+        delete err
+        return res
 
     def addCall(name:string; var call: RpcCall? implicit)
         calls[name] <- call
 
-    def addNotification(name:string; var notification: RpcNotification? implicit)
+    def addNotification(name:string; var notification: RpcCall? implicit)
         notifications[name] <- notification
 
 def sendResponse(var server: WebServer?; msg: string; id: double)
