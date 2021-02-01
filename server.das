@@ -166,6 +166,7 @@ def startServer(fileName: string; serverBuilder: block<(): WebServer?>)
             print("restarting via source change {new_time}\n")
             telnet->restart()
             break
+        sleep(0u)
     unsafe
         delete telnet
     return true
