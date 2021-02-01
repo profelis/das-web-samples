@@ -28,7 +28,7 @@ def main (fn:string)
                 fload(file, size) <| $(data:array<uint8>)
                     unsafe
                         let base <- base64(each(data))
-                        jsonRpc->sendResponse(server, to_string(base), id)
+                        server |> sendResponse(to_string(base), id)
 
         jsonRpc->addCall("reqImage", new LambdaRpcCall(sumHandler))
 

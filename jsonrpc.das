@@ -5,10 +5,10 @@ require daslib/json_boost
 
 
 class RpcCall
-    def abstract call(var params:RpcParams; id:double): void
+    def abstract call(var params: RpcParams; id:double): void
 
 class RpcNotification
-    def abstract call(var params:RpcParams): void
+    def abstract call(var params: RpcParams): void
 
 
 class LambdaRpcCall : RpcCall
@@ -53,6 +53,8 @@ class RpcParams
             return (params as _object)[name]
         return null
 
+def isBool(js: JsonValue?): bool
+    return js != null && js is _bool
 
 def asBool(js: JsonValue?): bool
     if js == null
@@ -65,6 +67,9 @@ def asBool(js: JsonValue?): bool
         return to_int(js as _string) != 0
     return js is _object || js is _array
 
+def isString(js: JsonValue?): bool
+    return js != null && js is _string
+
 def asString(js: JsonValue?): string
     if js == null
         return ""
@@ -76,6 +81,11 @@ def asString(js: JsonValue?): string
         return string(float(js as _number))
     return js is _object ? "[Object object]" : js is _array ? "[Array array]" : ""
 
+def isNumber(js: JsonValue?): bool
+    return js != null && js is _number
+
+def asNumber(js: JsonValue?): double
+    return asDouble(js)
 
 def asDouble(js: JsonValue?): double
     if js == null
