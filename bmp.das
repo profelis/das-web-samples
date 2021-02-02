@@ -101,6 +101,7 @@ def writeFile(fileName: string; width, height: int; blk: block<(var b:array<uint
         if fbmp != null
             var fileHolder = [[FileHolder f = fbmp]]
             write(fileHolder, width, height, blk)
+            delete fileHolder
             saved = true
     return saved
 

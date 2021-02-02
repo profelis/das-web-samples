@@ -27,6 +27,8 @@ def main (fn:string)
             unsafe
                 let base <- base64(each(res))
                 server |> sendResponse(to_string(base), id)
+            delete arr
+            delete res
 
         jsonRpc->addCall("reqImage", new LambdaRpcCall(sumHandler))
 
