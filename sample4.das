@@ -22,13 +22,11 @@ def main (fn:string)
             for y in range(h)
                 for x in range(w)
                     arr[idx++] = float3(float(x) / float(w), float(y) / float(h), 0f)
-            save_BMP("foo.bmp", w, h, arr)
-            fopen("foo.bmp", "rb+") <| $(file)
-                let size = int(fstat(file).size)
-                fload(file, size) <| $(data:array<uint8>)
-                    unsafe
-                        let base <- base64(each(data))
-                        server |> sendResponse(to_string(base), id)
+            var res: array<uint8>
+            bmp::writeArray(res, w, h, arr)
+            unsafe
+                let base <- base64(each(res))
+                server |> sendResponse(to_string(base), id)
 
         jsonRpc->addCall("reqImage", new LambdaRpcCall(sumHandler))
 
