@@ -36,6 +36,7 @@ class WebDebugAgent : DapiDebugAgent
     def override onUninstall ( agent:DebugAgent? ) : void
         if server != null
             print("destroy previous server\n")
+            server->restart()
             delete server
     def override onTick : void
         if server != null
