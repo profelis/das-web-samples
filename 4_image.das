@@ -7,7 +7,7 @@ require base64
 
 [export]
 def main (fn:string)
-    runServer(fn) <| $()
+    run_server(fn) <| $()
         var server = new WebServer()
 
         var jsonRpc = new JsonRpcHandler()
@@ -22,10 +22,10 @@ def main (fn:string)
                 for x in range(w)
                     arr[idx++] = float3(float(x) / float(w), float(y) / float(h), 0f)
             var res: array<uint8>
-            bmp::writeArray(res, w, h, arr)
+            bmp::write_array(res, w, h, arr)
             unsafe
                 let base <- base64(each(res))
-                server |> sendResponse(to_string(base), id)
+                server |> send_response(to_string(base), id)
             delete arr
             delete res
 

@@ -12,14 +12,14 @@ var
 
 def start (): WebServer?
     var res: WebServer?
-    let success = startServer() <| $()
+    let success = start_server() <| $()
         res = new WebServer()
 
         var jsonRpc = new JsonRpcHandler()
 
         var reverseHandler <- @ <| (var params: RpcParams; id: double)
-            let str = params->getArgN(0) |> asString()
-            res |> sendResponse(reverse(str), id)
+            let str = params->getArgN(0) |> as_string()
+            res |> send_response(reverse(str), id)
 
         jsonRpc->addCall("reverse", new LambdaRpcCall(reverseHandler))
 

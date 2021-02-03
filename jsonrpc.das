@@ -49,10 +49,10 @@ class RpcParams
             return (params as _object)[name]
         return null
 
-def isBool(js: JsonValue?): bool
+def is_bool(js: JsonValue?): bool
     return js != null && js is _bool
 
-def asBool(js: JsonValue?): bool
+def as_bool(js: JsonValue?): bool
     if js == null
         return false
     if js is _bool
@@ -63,10 +63,10 @@ def asBool(js: JsonValue?): bool
         return to_int(js as _string) != 0
     return js is _object || js is _array
 
-def isString(js: JsonValue?): bool
+def is_string(js: JsonValue?): bool
     return js != null && js is _string
 
-def asString(js: JsonValue?): string
+def as_string(js: JsonValue?): string
     if js == null
         return ""
     if js is _string
@@ -77,13 +77,13 @@ def asString(js: JsonValue?): string
         return string(float(js as _number))
     return js is _object ? "[Object object]" : js is _array ? "[Array array]" : ""
 
-def isNumber(js: JsonValue?): bool
+def is_number(js: JsonValue?): bool
     return js != null && js is _number
 
-def asNumber(js: JsonValue?): double
-    return asDouble(js)
+def as_number(js: JsonValue?): double
+    return as_double(js)
 
-def asDouble(js: JsonValue?): double
+def as_double(js: JsonValue?): double
     if js == null
         return 0lf
     if js is _number
@@ -95,7 +95,7 @@ def asDouble(js: JsonValue?): double
     
     return 0lf
 
-def asFloat(js: JsonValue?): float
+def as_float(js: JsonValue?): float
     if js == null
         return 0f
     if js is _number
@@ -107,7 +107,7 @@ def asFloat(js: JsonValue?): float
     
     return 0f
 
-def asInt(js: JsonValue?): int
+def as_int(js: JsonValue?): int
     if js == null
         return 0
     if js is _number

@@ -5,14 +5,14 @@ require daslib/json
 
 [export]
 def main (fn:string)
-    runServer(fn) <| $()
+    run_server(fn) <| $()
         var server = new WebServer()
 
         var jsonRpc = new JsonRpcHandler()
 
         var reverseHandler <- @ <| (var params: RpcParams; id: double)
-            let str = params->getArgN(0) |> asString()
-            server |> sendResponse(reverse(str), id)
+            let str = params->getArgN(0) |> as_string()
+            server |> send_response(reverse(str), id)
 
         jsonRpc->addCall("reverse", new LambdaRpcCall(reverseHandler))
 

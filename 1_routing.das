@@ -4,7 +4,7 @@ require daslib/regex_boost
 
 [export]
 def main (fn:string)
-    runServer(fn) <| $()
+    run_server(fn) <| $()
         var server = new WebServer()
         server->onRegex(%regex~\/items\/(.+)\/(.+)%%) <| @(msg: string; args: array<string>)
             return "{msg}: handled items. args: {args}\n"

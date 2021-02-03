@@ -89,7 +89,7 @@ class JsonRpcHandler
 
     def listenUnhandled(var server: WebServer?): void
         server->unhandled() <| @(msg: string; args: array<string>)
-            var res = getError("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, 0lf)
+            var res = get_error("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, 0lf)
             let str = write_json(res)
             delete res
             return str
@@ -109,7 +109,7 @@ class JsonRpcHandler
         if found
             return ""
 
-        var err = getError("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
+        var err = get_error("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
         let res = write_json(err)
         delete err
         return res
@@ -120,30 +120,30 @@ class JsonRpcHandler
     def addNotification(name:string; var notification: RpcCall? implicit)
         notifications[name] <- notification
 
-def sendResponse(var server: WebServer?; msg: string; id: double)
+def send_response(var server: WebServer?; msg: string; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => JV(msg) }})
     server->sendStr(write_json(res))
     delete res
 
-def sendRequest(var server: WebServer?; method: string; params: JsonValue?; id: double)
+def send_request(var server: WebServer?; method: string; params: JsonValue?; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
     server->sendStr(write_json(res))
     (res as _object) |> erase("params")
     delete res
 
-def sendNotification(var server: WebServer?; method: string; params: JsonValue?)
+def send_notification(var server: WebServer?; method: string; params: JsonValue?)
     var res = JV({{ "jsonrpc" => JV("2.0"); "method" => JV(method); "params" => params }})
     server->sendStr(write_json(res))
     (res as _object) |> erase("params")
     delete res
 
-def getError(error: string; code: double; id: double): JsonValue?
+def get_error(error: string; code: double; id: double): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
     if id != 0lf
         (res.value as _object)["id"] = JV(id)
     return res
 
-def sendError(var server: WebServer?; error: string; code: double; id: double)
-    var res = getError(error, code, id)
+def send_effor(var server: WebServer?; error: string; code: double; id: double)
+    var res = get_error(error, code, id)
     server->sendStr(write_json(res))
     delete res

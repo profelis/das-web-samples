@@ -144,7 +144,7 @@ class WebServer : Server
 
 
 
-def runServer(fileName: string; serverBuilder: block<(): WebServer?>): bool
+def run_server(fileName: string; serverBuilder: block<(): WebServer?>): bool
     isContDev = true
     let main_time = stat(fileName).mtime
     print("server starts at {main_time} file: {fileName}\n")
@@ -172,7 +172,7 @@ def runServer(fileName: string; serverBuilder: block<(): WebServer?>): bool
     return true
 
 
-def startServer(serverBuilder: block<(): WebServer?>): bool
+def start_server(serverBuilder: block<(): WebServer?>): bool
     isContDev = false
     let port = 9000
     var telnet = invoke(serverBuilder)

@@ -94,7 +94,7 @@ def convert(arr:array<float3>; width, height: int; var bytes:array<uint8>)
         bytes[idx * 3 + 2] = uint8((color >> 16u) & 0xFF)
 
 
-def writeFile(fileName: string; width, height: int; blk: block<(var b:array<uint8>):void>): bool
+def write_file(fileName: string; width, height: int; blk: block<(var b:array<uint8>):void>): bool
     verify(width % 4 == 0)
     var saved = false
     fopen(fileName, "wb") <| $ (fbmp)
@@ -106,17 +106,17 @@ def writeFile(fileName: string; width, height: int; blk: block<(var b:array<uint
     return saved
 
 
-def writeFile(fileName: string; width, height:int; arr:array<float3>): bool
+def write_file(fileName: string; width, height:int; arr:array<float3>): bool
     verify(width * height == length(arr))
-    return writeFile(fileName, width, height) <| $ (bytes)
+    return write_file(fileName, width, height) <| $ (bytes)
         convert(arr, width, height, bytes)
 
 
-def writeArray(var res: array<uint8>; width, height: int; blk: block<(var b:array<uint8>):void>)
+def write_array(var res: array<uint8>; width, height: int; blk: block<(var b:array<uint8>):void>)
     write(res, width, height, blk)
 
 
-def writeArray(var res: array<uint8>; width, height:int; arr:array<float3>)
+def write_array(var res: array<uint8>; width, height:int; arr:array<float3>)
     verify(width * height == length(arr))
-    writeArray(res, width, height) <| $ (bytes)
+    write_array(res, width, height) <| $ (bytes)
         convert(arr, width, height, bytes)

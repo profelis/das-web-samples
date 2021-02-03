@@ -7,7 +7,7 @@ var counter = 0
 
 [export]
 def main (fn:string)
-    runServer(fn) <| $()
+    run_server(fn) <| $()
         var server = new WebServer()
         server->onRegex(%regex~\/inc/(.+)%%) <| @(msg: string; args: array<string>)
             counter += to_int(args[0])
