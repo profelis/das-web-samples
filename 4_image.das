@@ -1,9 +1,9 @@
 require strings
 require server
 require jsonrpc_handler
-require daslib/json
 require bmp
 require base64
+
 
 [export]
 def main (fn:string)

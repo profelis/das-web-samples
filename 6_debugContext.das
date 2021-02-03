@@ -1,7 +1,6 @@
 require strings
 require server
 require jsonrpc_handler
-require daslib/json
 require debugapi
 require fio
 

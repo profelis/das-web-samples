@@ -143,7 +143,7 @@ def get_error(error: string; code: double; id: double): JsonValue?
         (res.value as _object)["id"] = JV(id)
     return res
 
-def send_effor(var server: WebServer?; error: string; code: double; id: double)
+def send_error(var server: WebServer?; error: string; code: double; id: double)
     var res = get_error(error, code, id)
     server->sendStr(write_json(res))
     delete res

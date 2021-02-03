@@ -1,7 +1,7 @@
 require strings
 require server
 require jsonrpc_handler
-require daslib/json
+
 
 [export]
 def main (fn:string)
