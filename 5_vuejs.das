@@ -2,13 +2,10 @@ require strings
 require server
 require jsonrpc_handler
 require daslib/json
-require bmp
-require fio
-require base64
 
 [export]
 def main (fn:string)
-    startServer(fn) <| $()
+    runServer(fn) <| $()
         var server = new WebServer()
 
         var jsonRpc = new JsonRpcHandler()

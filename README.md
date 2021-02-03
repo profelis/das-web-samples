@@ -3,9 +3,9 @@
 
 # usage
 
-- `dasContDev.exe sample.das`
+- `dasContDev.exe N_<name>.das`
 - `node websockify.js localhost:1000 localhost:9000`
-- open in browser `sample.html`
+- open in browser `N_<name>.html`
 
 # utils
 

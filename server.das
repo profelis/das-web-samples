@@ -144,10 +144,10 @@ class WebServer : Server
 
 
 
-def startServer(fileName: string; serverBuilder: block<(): WebServer?>)
+def runServer(fileName: string; serverBuilder: block<(): WebServer?>): bool
     isContDev = true
     let main_time = stat(fileName).mtime
-    print("server starts at {main_time}\n")
+    print("server starts at {main_time} file: {fileName}\n")
     let port = 9000
     var telnet = invoke(serverBuilder)
     var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr("telnet-session")
@@ -169,4 +169,21 @@ def startServer(fileName: string; serverBuilder: block<(): WebServer?>)
         sleep(0u)
     unsafe
         delete telnet
+    return true
+
+
+def startServer(serverBuilder: block<(): WebServer?>): bool
+    isContDev = false
+    let port = 9000
+    var telnet = invoke(serverBuilder)
+    var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr("telnet-session")
+    if session != null
+        print("restoring server after restart\n")
+        telnet->restore(session)
+    elif telnet->init(9000)
+        print("sever at port {port}\n")
+    else
+        print("server failed to initialize\n")
+        delete telnet
+        return false
     return true

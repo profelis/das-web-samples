@@ -4,7 +4,7 @@ require daslib/json
 
 [export]
 def main (fn:string)
-    startServer(fn) <| $()
+    runServer(fn) <| $()
         var server = new WebServer()
 
         var jsonRpc = new JsonRpcHandler()
