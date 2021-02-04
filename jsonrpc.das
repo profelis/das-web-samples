@@ -29,6 +29,24 @@ class LambdaRpcNotification : RpcCall
         invoke(fn, params)
 
 
+class FunctionRpcCall : RpcCall
+    fn: function<(var params: RpcParams; id: double):void>
+    def FunctionRpcCall(var f: function<(var params: RpcParams; id: double):void>)
+        fn <- f
+
+    def override call(var params: RpcParams; id:double): void
+        invoke(fn, params, id)
+
+
+class FunctionRpcNotification : RpcCall
+    fn: function<(var params: RpcParams):void>
+    def FunctionRpcNotification(var f: function<(var params: RpcParams):void>)
+        fn <- f
+
+    [unused_argument(id)] def override call(var params: RpcParams; id:double): void
+        invoke(fn, params)
+
+
 class RpcParams
     params: JsonValue?
     num : int = 0
