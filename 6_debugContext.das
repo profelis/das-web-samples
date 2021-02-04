@@ -31,15 +31,26 @@ def start (): WebServer?
 class WebDebugAgent : DapiDebugAgent
     def override onInstall ( agent:DebugAgent? ) : void
         print("start new server\n")
+        debug(this_context())
         server = start()
     def override onUninstall ( agent:DebugAgent? ) : void
         if server != null
             print("destroy previous server\n")
             server->restart()
             delete server
-    def override onTick : void
+    def override onTick() : void
         if server != null
             server->tick()
+
+[export]
+def ping()
+    print("ping call\n")
+    debug(this_context())
+    debug(server)
+
+def has_debug_agent(): bool
+    unsafe
+        return reinterpret<void?> get_debug_agent_context() != null
 
 
 [export]
@@ -50,8 +61,15 @@ def debug_agent ( ctx : Context )
 [export]
 def main (fn:string)
     let main_time = stat(fn).mtime
-    print("start file {fn} at {main_time}\n")
-    fork_debug_agent_context(@@debug_agent)
+    print("start file {fn} at {main_time} agent:{has_debug_agent()}\n")
+    if !has_debug_agent()
+        print("fork debug agent\n")
+        fork_debug_agent_context(@@debug_agent)
+    else
+        print("debug agent already exist\n")
+    // ping()
+    unsafe
+        get_debug_agent_context() |> invoke_in_context("ping")
     while true
         let new_time = stat(fn).mtime
         if new_time != main_time
