@@ -1,3 +1,5 @@
+options indenting = 4
+
 require server
 require jsonrpc_handler
 require daslib/json

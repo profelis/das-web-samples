@@ -1,3 +1,5 @@
+options indenting = 4
+
 require server
 require daslib/regex
 require daslib/regex_boost

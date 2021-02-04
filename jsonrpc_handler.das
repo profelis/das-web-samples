@@ -1,3 +1,7 @@
+options indenting = 4
+options remove_unused_symbols = false
+module jsonrpc_handler
+
 require strings
 require server
 require daslib/json

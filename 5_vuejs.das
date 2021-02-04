@@ -1,3 +1,5 @@
+options indenting = 4
+
 require strings
 require server
 require jsonrpc_handler

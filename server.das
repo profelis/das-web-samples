@@ -1,4 +1,6 @@
-// options log = true
+options indenting = 4
+options remove_unused_symbols = false
+module server
 
 require network
 require fio

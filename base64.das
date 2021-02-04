@@ -1,3 +1,7 @@
+options indenting = 4
+options remove_unused_symbols = false
+module base64 shared
+
 require strings
 
 // note: this is equivalent to

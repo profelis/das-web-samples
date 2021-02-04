@@ -1,7 +1,12 @@
+options indenting = 4
+options remove_unused_symbols = false
+module jsonrpc
+
 require strings
 require server
 require daslib/json
 require daslib/json_boost
+
 
 class RpcCall
     def abstract call(var params: RpcParams; id: double): void
