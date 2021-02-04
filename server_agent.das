@@ -175,3 +175,7 @@ def start_agent()
         fork_debug_agent_context(@@start_debug_agent)
     else
         print("debug agent already exist\n")
+
+[export]
+def tick_agent()
+    tick_debug_agent()
