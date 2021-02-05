@@ -38,6 +38,11 @@ class WebDebugAgent : DapiDebugAgent
     def override onDestroyContext(ctx: Context)
         if server == null
             return
+        unsafe
+            let localCtx: Context const & = this_context()
+            if addr(localCtx) == addr(ctx)
+                delete server
+                return
         var toRemoveCalls: array<string>
         for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)
             unsafe
@@ -175,6 +180,7 @@ def start_agent()
         fork_debug_agent_context(@@start_debug_agent)
     else
         print("debug agent already exist\n")
+    // fork_debug_agent_context(@@start_debug_agent)
 
 [export]
 def tick_agent()
