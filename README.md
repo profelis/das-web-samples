@@ -26,4 +26,4 @@
 - https://github.com/DimanVorosh/vue-json-rpc-websocket
 
 # TODO
-- request success/failed handlers
+- batch calls
