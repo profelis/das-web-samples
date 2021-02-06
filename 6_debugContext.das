@@ -54,7 +54,7 @@ def reverse_handler(var params: RpcParams; id: double)
     send_response(reverse(str), id)
 
 [export]
-def whatsup_handler(var params: RpcParams; id: double)
+def whatsup_handler(var params: RpcParams)
     unsafe
         verify(addr(get_debug_agent_context()) != addr(this_context()))
 

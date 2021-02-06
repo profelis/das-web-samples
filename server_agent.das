@@ -24,9 +24,9 @@ def start(): WebServer?
 
 
 class WebDebugAgent : DapiDebugAgent
-    def override onInstall ( agent:DebugAgent? ) : void
+    [unused_argument(agent)] def override onInstall ( agent:DebugAgent? ) : void
         server = start()
-    def override onUninstall ( agent:DebugAgent? ) : void
+    [unused_argument(agent)] def override onUninstall ( agent:DebugAgent? ) : void
         if server != null
             server->restart()
             unsafe
@@ -231,18 +231,15 @@ def has_debug_agent(): bool
         return addr(get_debug_agent_context()) != null
 
 
-[export,private]
+[export,private,unused_argument(ctx)]
 def start_debug_agent(ctx: Context)
-    print("before install {this_context()}\n")
     install_new_debug_agent(new WebDebugAgent())
 
 
 [export]
 def start_agent(force:bool = false): bool
     if force || !has_debug_agent()
-        print("fork debug agent\n")
         fork_debug_agent_context(@@start_debug_agent)
-        print("fork debug agent after\n")
     else
         print("debug agent already exist\n")
     return true
