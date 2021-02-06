@@ -69,15 +69,15 @@ class WebServer : Server
         unhandledHandler <- handler
 
     def override onError(msg:string; code:int)
-        print("[E] :{port}: error code: {code} msg: {msg}\n")
+        print("[E] :{port} error code: {code} msg: {msg}\n")
 
     def override onConnect()
         if debugLogs
-            print(":{port}: client connected\n")
+            print(":{port} client connected\n")
 
     def override onDisconnect()
         if debugLogs
-            print(":{port}: client disconnected\n")
+            print(":{port} client disconnected\n")
         if length(current_string) > 0
             print("[W] :{port} unhandled req `{string(current_string)}`")
             current_string |> clear()
