@@ -1,11 +1,13 @@
 options indenting = 2
 
 require strings
-require server
-require jsonrpc_handler
-require jsonrpc_rtti
-require daslib/json
 require debugapi
+
+require daslib/json
+
+require jsonrpc_rtti
+require jsonrpc_handler
+require server
 
 
 var

@@ -2,8 +2,9 @@ options indenting = 2
 options remove_unused_symbols = false
 module jsonrpc_rtti
 
-require jsonrpc
 require debugapi
+
+require jsonrpc
 
 class ScopedRpcCall : RpcCall
   ctx: rtti::Context?

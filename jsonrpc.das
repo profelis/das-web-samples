@@ -3,9 +3,9 @@ options remove_unused_symbols = false
 module jsonrpc
 
 require strings
-require server
 require daslib/json
 require daslib/json_boost
+require server
 
 
 class RpcCall

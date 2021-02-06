@@ -3,8 +3,9 @@ options remove_unused_symbols = false
 module debug_server
 
 require network
-require server public
 require fio
+
+require server public
 
 
 def run_debug_server(var server: WebServer?; fileName:string): bool

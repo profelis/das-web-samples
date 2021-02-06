@@ -3,8 +3,10 @@ options remove_unused_symbols = false
 module jsonrpc_handler
 
 require strings
+
 require daslib/json
 require daslib/json_boost
+
 require jsonrpc public
 require server
 
