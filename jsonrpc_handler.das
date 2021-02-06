@@ -29,7 +29,8 @@ class JsonRpcMatch : Matcher
 
     def override match(str: string): MatchResult
         params = null
-        delete js
+        unsafe
+            delete js
 
         if find(str, "\"jsonrpc\"") < 0
             return <- [[MatchResult invalid = null]]

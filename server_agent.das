@@ -29,7 +29,8 @@ class WebDebugAgent : DapiDebugAgent
     def override onUninstall ( agent:DebugAgent? ) : void
         if server != null
             server->restart()
-            delete server
+            unsafe
+                delete server
     def override onDestroyContext(ctx: Context)
         if server == null
             return
