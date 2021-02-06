@@ -2,42 +2,42 @@
 
 <body>
 
-    <input type="button" onclick="inc(1)" value="+1"></input>
-    <input type="button" onclick="dec(1)" value="-1"></input>
+  <input type="button" onclick="inc(1)" value="+1"></input>
+  <input type="button" onclick="dec(1)" value="-1"></input>
 
-    <input type="button" onclick="inc(10)" value="+10"></input>
-    <input type="button" onclick="dec(10)" value="-10"></input>
+  <input type="button" onclick="inc(10)" value="+10"></input>
+  <input type="button" onclick="dec(10)" value="-10"></input>
 
-    <p id="text"></p>
-    <script>
-        const socket = new WebSocket('ws://localhost:1000')
+  <p id="text"></p>
+  <script>
+    const socket = new WebSocket('ws://localhost:1000')
 
-        socket.addEventListener("close", function (event) {
-            console.log('Socked closed ', JSON.stringify(event))
-        })
+    socket.addEventListener("close", function (event) {
+      console.log('Socked closed ', JSON.stringify(event))
+    })
 
-        socket.addEventListener("error", function (event) {
-            console.log('Socked error ', JSON.stringify(event))
-        })
+    socket.addEventListener("error", function (event) {
+      console.log('Socked error ', JSON.stringify(event))
+    })
 
-        socket.addEventListener('open', function (event) {
-            console.log('Socked connected', event)
-            socket.send("/get\n") // request initial count
-        })
+    socket.addEventListener('open', function (event) {
+      console.log('Socked connected', event)
+      socket.send("/get\n") // request initial count
+    })
 
-        socket.addEventListener('message', async function (event) {
-            let result = await event.data.text()
-            document.getElementById("text").innerText = "counter: " + result
-            console.log('Message from server ', result)
-        })
+    socket.addEventListener('message', async function (event) {
+      let result = await event.data.text()
+      document.getElementById("text").innerText = "counter: " + result
+      console.log('Message from server ', result)
+    })
 
-        function inc(value) {
-            socket.send(`/inc/${value}\n`)
-        }
-        function dec(value) {
-            socket.send(`/dec/${value}\n`)
-        }
-    </script>
+    function inc(value) {
+      socket.send(`/inc/${value}\n`)
+    }
+    function dec(value) {
+      socket.send(`/dec/${value}\n`)
+    }
+  </script>
 
 </body>
 

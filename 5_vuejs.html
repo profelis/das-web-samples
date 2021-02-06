@@ -4,42 +4,42 @@
 
 <body>
 
-    <div id="app">
-        <p>{{ message }}</p>
-        <button v-on:click="reverseMessage">Reverse Message</button>
-    </div>
+  <div id="app">
+    <p>{{ message }}</p>
+    <button v-on:click="reverseMessage">Reverse Message</button>
+  </div>
 
-    <script src="./simple-jsonprc-js.js"></script>
-    <script>
-        var jrpc = new simple_jsonrpc()
-        var socket = new WebSocket("ws://localhost:1000")
+  <script src="./simple-jsonprc-js.js"></script>
+  <script>
+    var jrpc = new simple_jsonrpc()
+    var socket = new WebSocket("ws://localhost:1000")
 
-        socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
-        jrpc.toStream = _msg => socket.send(_msg)
+    socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
+    jrpc.toStream = _msg => socket.send(_msg)
 
-        socket.onerror = error => console.error("Error: " + error.message)
+    socket.onerror = error => console.error("Error: " + error.message)
 
-        socket.onclose = function (event) {
-            if (event.wasClean) {
-                console.info('Connection close was clean')
-            } else {
-                console.error('Connection suddenly close')
-            }
-            console.info('close code : ' + event.code + ' reason: ' + event.reason)
+    socket.onclose = function (event) {
+      if (event.wasClean) {
+        console.info('Connection close was clean')
+      } else {
+        console.error('Connection suddenly close')
+      }
+      console.info('close code : ' + event.code + ' reason: ' + event.reason)
+    }
+
+    var app5 = new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue.js!'
+      },
+      methods: {
+        reverseMessage: function () {
+          jrpc.call('reverse', [this.message]).then((data) => this.message = data)
         }
-
-        var app5 = new Vue({
-            el: '#app',
-            data: {
-                message: 'Hello Vue.js!'
-            },
-            methods: {
-                reverseMessage: function () {
-                    jrpc.call('reverse', [this.message]).then((data) => this.message = data)
-                }
-            }
-        })
-    </script>
+      }
+    })
+  </script>
 
 </body>
 

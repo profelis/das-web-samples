@@ -2,64 +2,64 @@
 
 <body>
 
-    <input type="button" onclick="reqUpdateTitle()" value="Update title"></input>
-    <input type="button" onclick="sendUnknownCall()" value="Unknown call"></input>
+  <input type="button" onclick="reqUpdateTitle()" value="Update title"></input>
+  <input type="button" onclick="sendUnknownCall()" value="Unknown call"></input>
 
-    <p id="text"></p>
-    <script src="./simple-jsonprc-js.js"></script>
-    <script>
-        var jrpc = new simple_jsonrpc()
-        var socket = new WebSocket("ws://localhost:1000")
+  <p id="text"></p>
+  <script src="./simple-jsonprc-js.js"></script>
+  <script>
+    var jrpc = new simple_jsonrpc()
+    var socket = new WebSocket("ws://localhost:1000")
 
-        //wait of notification
-        jrpc.on('setTitle', function (title) {
-            document.getElementById("text").innerText += "on setTitle notification: " + title + "\n"
-        })
+    //wait of notification
+    jrpc.on('setTitle', function (title) {
+      document.getElementById("text").innerText += "on setTitle notification: " + title + "\n"
+    })
 
-        socket.onmessage = async event=> jrpc.messageHandler(await event.data.text())
+    socket.onmessage = async event=> jrpc.messageHandler(await event.data.text())
 
-        jrpc.toStream = _msg => socket.send(_msg)
+    jrpc.toStream = _msg => socket.send(_msg)
 
-        socket.onerror = error => console.error("Error: " + error.message)
+    socket.onerror = error => console.error("Error: " + error.message)
 
-        socket.onclose = function (event) {
-            if (event.wasClean) {
-                console.info('Connection close was clean')
-            } else {
-                console.error('Connection suddenly close')
-            }
-            console.info('close code : ' + event.code + ' reason: ' + event.reason)
-        }
+    socket.onclose = function (event) {
+      if (event.wasClean) {
+        console.info('Connection close was clean')
+      } else {
+        console.error('Connection suddenly close')
+      }
+      console.info('close code : ' + event.code + ' reason: ' + event.reason)
+    }
 
-        socket.onopen = function () {
+    socket.onopen = function () {
 
-            //calls
-            jrpc.call('sum', [22, 32]).then(function (result) {
-                document.getElementById("text").innerText += "sum call result: " + result + "\n"
-                console.log(result)
-            })
+      //calls
+      jrpc.call('sum', [22, 32]).then(function (result) {
+        document.getElementById("text").innerText += "sum call result: " + result + "\n"
+        console.log(result)
+      })
 
-            // jrpc.call('mul', { y: 3, x: 2 }).then(function (result) {
-            //     document.getElementsByClassName('paragraph')[0].innerHTML += 'mul(2, 3) result: ' + result + '<br>'
-            // })
+      // jrpc.call('mul', { y: 3, x: 2 }).then(function (result) {
+      //   document.getElementsByClassName('paragraph')[0].innerHTML += 'mul(2, 3) result: ' + result + '<br>'
+      // })
 
-            // jrpc.batch([
-            //     { call: { method: "add", params: [5, 2] } },
-            //     { call: { method: "mul", params: [100, 200] } },
-            //     { call: { method: "create", params: { item: { foo: "bar" }, rewrite: true } } }
-            // ])
-        }
+      // jrpc.batch([
+      //   { call: { method: "add", params: [5, 2] } },
+      //   { call: { method: "mul", params: [100, 200] } },
+      //   { call: { method: "create", params: { item: { foo: "bar" }, rewrite: true } } }
+      // ])
+    }
 
-        function reqUpdateTitle() {
-            jrpc.notification('reqUpdateTitle')
-        }
-        function sendUnknownCall() {
-            jrpc.call('sendUnknownCall').catch(function (err) {
-                document.getElementById("text").innerText += "sendUnknownCall result: " + JSON.stringify(err) + "\n"
-                console.log(err)
-            })
-        }
-    </script>
+    function reqUpdateTitle() {
+      jrpc.notification('reqUpdateTitle')
+    }
+    function sendUnknownCall() {
+      jrpc.call('sendUnknownCall').catch(function (err) {
+        document.getElementById("text").innerText += "sendUnknownCall result: " + JSON.stringify(err) + "\n"
+        console.log(err)
+      })
+    }
+  </script>
 
 </body>
 
