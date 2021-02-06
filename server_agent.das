@@ -66,130 +66,165 @@ class WebDebugAgent : DapiDebugAgent
         if server != null
             server->tick()
 
+def verify_in_debug_server()
+    unsafe
+        var debugAgent = addr(get_debug_agent_context())
+        verify(debugAgent != null)
+        verify(debugAgent == addr(this_context()))
+        verify(server != null)
+        verify(jsonRpc != null)
+    return true
+
+[private]
+def verify_not_in_debug()
+    unsafe
+        var debugAgent = addr(get_debug_agent_context())
+        verify(debugAgent != null)
+        verify(debugAgent != addr(this_context()))
+    return true
 
 [export]
 def _add_call(name:string; var call: ScopedRpcCall?)
-    if jsonRpc == null
-        print("[E] add_call: server in not initialized\n")
+    if !verify_in_debug_server()
         return
     print("add call `{name}`\n")
     jsonRpc->addCall(name, call)
 
 [export]
 def add_call(name:string; var call: ScopedRpcCall?)
-    if !has_debug_agent()
-        print("[E] add_call: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_add_call", name, call)
 
 [export]
 def _add_call_fn(name:string; var fn: function; var ctx: Context)
-    if jsonRpc == null
-        print("[E] add_call: server in not initialized\n")
+    if !verify_in_debug_server()
         return
     print("add call `{name}`\n")
     jsonRpc->addCall(name, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
 def add_call(name:string; var fn: function; var ctx: Context)
-    if !has_debug_agent()
-        print("[E] add_call: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, ctx)
 
 [export]
+def add_call(name:string; var fn: function)
+    if !verify_not_in_debug()
+        return
+    unsafe
+        get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, this_context())
+
+[export]
 def _add_notification(name:string; var call: ScopedRpcCall?)
-    if jsonRpc == null
-        print("[E] add_notification: server in not initialized\n")
+    if !verify_in_debug_server()
         return
     print("add notification `{name}`\n")
     jsonRpc->addNotification(name, call)
 
 [export]
 def add_notification(name:string; var call: ScopedRpcCall?)
-    if !has_debug_agent()
-        print("[E] add_notification: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("add_notification", name, call)
 
 [export]
 def _add_notification_fn(name:string; var fn: function; var ctx: Context)
-    if jsonRpc == null
-        print("[E] add_notification: server in not initialized\n")
+    if !verify_in_debug_server()
         return
     print("add notification `{name}`\n")
     jsonRpc->addNotification(name, new ContextFunctionRpcNotification(fn, ctx))
 
 [export]
 def add_notification(name:string; var fn: function; var ctx: Context)
-    if !has_debug_agent()
-        print("[E] add_notification: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, ctx)
 
 [export]
-def _send_response(msg: string; id: double)
-    if server == null
-        print("[E] send_response: server in not initialized\n")
+def add_notification(name:string; var fn: function)
+    if !verify_not_in_debug()
         return
-    server |> send_response(msg, id)
+    unsafe
+        get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, this_context())
+
+[export]
+def _send_response(msg: string; id: double)
+    if !verify_in_debug_server()
+        return
+    jsonRpc->send_response(server, msg, id)
 
 [export]
 def send_response(msg: string; id: double)
-    if !has_debug_agent()
-        print("[E] send_response: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_send_response", msg, id)
 
 [export]
-def _send_request(method: string; var params: JsonValue?; id: double)
-    if server == null
-        print("[E] send_request: server in not initialized\n")
+def _send_request_raw(method: string; var params: JsonValue?; id: double)
+    if !verify_in_debug_server()
         return
-    server |> send_request(method, params, id)
+    jsonRpc->send_request_raw(server, method, params, id)
 
 [export]
 def send_request(method: string; var params: JsonValue?; id: double)
-    if !has_debug_agent()
-        print("[E] send_request: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
-        get_debug_agent_context() |> invoke_in_context("_send_request", method, params, id)
+        get_debug_agent_context() |> invoke_in_context("_send_request_raw", method, params, id)
+
+[export]
+def _send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
+    if !verify_in_debug_server()
+        return
+    jsonRpc->send_request(server, method, params, new ContextFunctionRpcCall(fn, ctx))
+
+[export]
+def send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
+    if !verify_not_in_debug()
+        return
+    unsafe
+        get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, ctx)
+
+[export]
+def send_request(method: string; var params: JsonValue?; var fn: function)
+    if !verify_not_in_debug()
+        return
+    unsafe
+        get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, this_context())
 
 [export]
 def _send_notification(method: string; var params: JsonValue?)
-    if server == null
-        print("[E] send_notification: server in not initialized\n")
+    if !verify_in_debug_server()
         return
-    server |> send_notification(method, params)
+    jsonRpc->send_notification(server, method, params)
 
 [export]
 def send_notification(method: string; var params: JsonValue?)
-    if !has_debug_agent()
-        print("[E] send_notification: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_send_notification", method, params)
 
 [export]
 def _send_error(error: string; code: double; id: double)
-    if server == null
-        print("[E] send_error: server in not initialized\n")
+    if !verify_in_debug_server()
         return
-    server |> send_error(error, code, id)
+    jsonRpc->send_error(server, error, code, id)
 
 [export]
 def send_error(error: string; code: double; id: double)
-    if !has_debug_agent()
-        print("[E] send_error: debug agent in not initialized\n")
+    if !verify_not_in_debug()
         return
     unsafe
         get_debug_agent_context() |> invoke_in_context("_send_error", error, code, id)
+
 
 def has_debug_agent(): bool
     unsafe

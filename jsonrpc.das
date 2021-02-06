@@ -60,6 +60,8 @@ class RpcParams
                 num = length(params as _object)
 
     def getArgN(idx: int): JsonValue?
+        if idx == 0 && num == 0
+            return params
         if idx >= num
             return null
 

@@ -88,6 +88,9 @@ class WebServer : Server
             self->save(session)
             gc0_save_smart_ptr(restore_session, session)
 
+    def sendStrLf(str: string)
+        self->sendStr("{str}\n") // use '\n' to split multiple messages on client
+
     def sendStr(str: string)
         unsafe
             self->send(reinterpret<uint8?> str, length(str))

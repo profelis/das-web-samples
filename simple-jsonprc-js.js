@@ -294,6 +294,9 @@
                                 });
                             }
                         }
+                        else {
+                            result = dispatcher[request.method].fn.apply(dispatcher, [request.params]);
+                        }
                     }
                     else {
                         result = dispatcher[request.method].fn();

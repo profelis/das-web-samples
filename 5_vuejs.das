@@ -13,7 +13,7 @@ def main (fn:string)
 
     var reverseHandler <- @ <| (var params: RpcParams; id: double)
         let str = params->getArgN(0) |> as_string()
-        server |> send_response(reverse(str), id)
+        jsonRpc->send_response(server, reverse(str), id)
 
     jsonRpc->addCall("reverse", new LambdaRpcCall(reverseHandler))
 

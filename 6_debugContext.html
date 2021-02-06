@@ -5,6 +5,8 @@
 <body>
 
     <div id="app">
+        <p> Status: {{ status }}</p>
+        <p> Server time: {{ serverTime }}</p>
         <p>{{ message }}</p>
         <button v-on:click="reverseMessage">Reverse Message</button>
     </div>
@@ -12,16 +14,32 @@
     <script src="./simple-jsonprc-js.js"></script>
     <script>
         var jrpc = new simple_jsonrpc()
-        var tries = 5
-        
-        function createSocket()
-        {
+
+        function createSocket() {
             var socket = new WebSocket("ws://localhost:1000")
-            socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
+            socket.onmessage = async event => {
+                let text = await event.data.text()
+                // split multiple json messages in one string
+                let lines = text.split("\n")
+                let i = 0;
+                let str = ""
+                for (; i < lines.length; ++i) {
+                    str += lines[i]
+                    if (lines[i] == "}") {
+                        try {
+                            JSON.parse(str)
+                            jrpc.messageHandler(str)
+                            str = ""
+                        } catch (e) {}
+                    }
+                }
+                if (str.length > 0)
+                    jrpc.messageHandler(str)
+            }
             jrpc.toStream = _msg => socket.send(_msg)
 
             socket.onerror = error => console.error("Error: " + error.message)
-            socket.onopen = evt => tries = 5
+            socket.onopen = evt => jrpc.notification("whatsup")
 
             socket.onclose = function (event) {
                 if (event.wasClean) {
@@ -30,12 +48,8 @@
                     console.error('Connection suddenly close')
                 }
                 console.info('close code : ' + event.code + ' reason: ' + event.reason)
-                tries--
-                if (tries > 0)
-                {
-                    console.log(`reconnect... ${tries}`)
-                    setTimeout(createSocket, 100)
-                }
+                console.log(`reconnect... `)
+                setTimeout(createSocket, 1000)
             }
         }
         createSocket()
@@ -43,6 +57,8 @@
         var app5 = new Vue({
             el: '#app',
             data: {
+                status: "",
+                serverTime: "",
                 message: 'Hello Vue.js!'
             },
             methods: {
@@ -50,6 +66,19 @@
                     jrpc.call('reverse', [this.message]).then((data) => this.message = data)
                 }
             }
+        })
+
+        jrpc.on("status", data => {
+            console.log("status message ", data)
+            app5.status = data
+        })
+        jrpc.on("serverTime", data => {
+            console.log("serverTime message ", data)
+            app5.serverTime = `${data}`
+        })
+        jrpc.on("giveHelp", data => {
+            console.log("giveHelp message ", data)
+            return "help"
         })
     </script>
 
