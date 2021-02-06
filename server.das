@@ -3,14 +3,10 @@ options remove_unused_symbols = false
 module server
 
 require network
-require fio
 require strings
 require daslib/strings_boost
 require daslib/regex
 
-
-var
-    isContDev = false
 
 typedef
     Handler = lambda<(message: string; args: array<string>): string>
@@ -25,8 +21,8 @@ class StringMatch : Matcher
     def StringMatch(str: string)
         matchStr = str
     def override match(str: string): MatchResult
-        if str == matchStr 
-            return <- [[MatchResult args <- [{ auto[] str }] ]] 
+        if str == matchStr
+            return <- [[MatchResult args <- [{ auto[] str }] ]]
         return <- [[MatchResult invalid = null]]
 
 
@@ -42,10 +38,14 @@ class RegexMatch : Matcher
         for gr,x in matchRe.groups, range(length(matchRe.groups)-1)
             let grp = regex_group(matchRe, x+1, str)
             args |> push(grp)
-        return <- [[MatchResult args <- args ]] 
+        return <- [[MatchResult args <- args ]]
 
 
 class WebServer : Server
+    port:int = 9000
+    restore_session: string = "server-session"
+    debugLogs : bool = true
+
     current_string : array<uint8>
     done : bool = false
     matchers: array<Matcher?>
@@ -69,22 +69,24 @@ class WebServer : Server
         unhandledHandler <- handler
 
     def override onError(msg:string; code:int)
-        print("server error: {code} - {msg}\n")
+        print("[E] :{port}: error code: {code} msg: {msg}\n")
 
-    def override onConnect
-        print("connected\n")
+    def override onConnect()
+        if debugLogs
+            print(":{port}: client connected\n")
 
-    def override onDisconnect
+    def override onDisconnect()
+        if debugLogs
+            print(":{port}: client disconnected\n")
         if length(current_string) > 0
-            print(string(current_string))
+            print("[W] :{port} unhandled req `{string(current_string)}`")
             current_string |> clear()
-        print("disconnected\n")
 
     def restart
         if _server != null
             var session : smart_ptr<NetworkServer>
             self->save(session)
-            gc0_save_smart_ptr("telnet-session", session)
+            gc0_save_smart_ptr(restore_session, session)
 
     def sendStr(str: string)
         unsafe
@@ -100,7 +102,8 @@ class WebServer : Server
 
             if int(ch) == '\n' && length(current_string) > 0
                 let str = string(current_string)
-                print("`{str}` length={length(current_string)}\n")
+                if debugLogs
+                    print(":{port} < `{str}`\n")
                 var found = false
                 var needMore = false
                 for matcher, idx in matchers, iter_range(matchers)
@@ -125,7 +128,7 @@ class WebServer : Server
                             self->sendStr(res)
                 current_string |> clear()
                 continue
-            
+
             current_string |> push(ch)
 
         if length(current_string) > 0
@@ -145,47 +148,19 @@ class WebServer : Server
                 break
 
 
-
-def run_server(fileName: string; serverBuilder: block<(): WebServer?>): bool
-    isContDev = true
-    let main_time = stat(fileName).mtime
-    print("server starts at {main_time} file: {fileName}\n")
-    let port = 9000
-    var telnet = invoke(serverBuilder)
-    var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr("telnet-session")
+def start_server(var server: WebServer?): bool
+    var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr(server.restore_session)
     if session != null
-        print("restoring server after restart\n")
-        telnet->restore(session)
-    elif telnet->init(9000)
-        print("sever at port {port}\n")
+        if server.debugLogs
+            print("restoring :{server.port} after restart\n")
+        server->restore(session)
+    elif server->init(server.port)
+        if server.debugLogs
+            print("start :{server.port}\n")
     else
-        print("server failed to initialize\n")
-        return false
-    while !telnet.done
-        telnet->tick()
-        let new_time = stat(fileName).mtime
-        if new_time != main_time
-            print("restarting via source change {new_time}\n")
-            telnet->restart()
-            break
-        sleep(0u)
-    unsafe
-        delete telnet
-    return true
-
-
-def start_server(serverBuilder: block<(): WebServer?>): bool
-    isContDev = false
-    let port = 9000
-    var telnet = invoke(serverBuilder)
-    var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr("telnet-session")
-    if session != null
-        print("restoring server after restart\n")
-        telnet->restore(session)
-    elif telnet->init(9000)
-        print("sever at port {port}\n")
-    else
-        print("server failed to initialize\n")
-        delete telnet
+        if server.debugLogs
+            print(":{server.port} failed to initialize\n")
+        unsafe
+            delete server
         return false
     return true

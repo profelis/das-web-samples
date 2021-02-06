@@ -3,10 +3,10 @@ options remove_unused_symbols = false
 module jsonrpc_handler
 
 require strings
-require server
 require daslib/json
 require daslib/json_boost
 require jsonrpc public
+require server
 
 let
     PARSE_ERROR_CODE = -32700lf
@@ -47,7 +47,7 @@ class JsonRpcMatch : Matcher
             // TODO: batch request, return [[MatchResult more = null]]
             print("unsuppported batch request")
             return <- [[MatchResult invalid = null]]
-        
+
         if js is _object
             var success = true
             id = 0lf
@@ -73,7 +73,7 @@ class JsonRpcMatch : Matcher
                     success = false
 
             if success
-                return <- [[MatchResult args <- [{ string[] "" }] ]] 
+                return <- [[MatchResult args <- [{ string[] "" }] ]]
         return <- [[MatchResult invalid = null]]
 
 
@@ -94,8 +94,10 @@ class JsonRpcHandler
     def listenUnhandled(var server: WebServer?): void
         server->unhandled() <| @(msg: string; args: array<string>)
             var res = get_error("{PARSE_ERROR}: {msg}", PARSE_ERROR_CODE, 0lf)
+            print("[E] {PARSE_ERROR}: `{msg}\n")
             let str = write_json(res)
-            delete res
+            unsafe
+                delete res
             return str
 
     [unused_argument(msg)] def rpcHandler(msg: string): string
@@ -113,9 +115,11 @@ class JsonRpcHandler
         if found
             return ""
 
-        var err = get_error("{METHOD_NOT_FOUND}: {match.method}: id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
+        var err = get_error("{METHOD_NOT_FOUND}: `{match.method}` id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
         let res = write_json(err)
-        delete err
+        unsafe
+            delete err
+        print("[E] {METHOD_NOT_FOUND}: `{match.method}` id: {match.id}\n")
         return res
 
     def addCall(name:string; var call: RpcCall? implicit)
@@ -124,22 +128,26 @@ class JsonRpcHandler
     def addNotification(name:string; var notification: RpcCall? implicit)
         notifications[name] <- notification
 
+
 def send_response(var server: WebServer?; msg: string; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => JV(msg) }})
     server->sendStr(write_json(res))
-    delete res
+    unsafe
+        delete res
 
 def send_request(var server: WebServer?; method: string; params: JsonValue?; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
     server->sendStr(write_json(res))
     (res as _object) |> erase("params")
-    delete res
+    unsafe
+        delete res
 
 def send_notification(var server: WebServer?; method: string; params: JsonValue?)
     var res = JV({{ "jsonrpc" => JV("2.0"); "method" => JV(method); "params" => params }})
     server->sendStr(write_json(res))
     (res as _object) |> erase("params")
-    delete res
+    unsafe
+        delete res
 
 def get_error(error: string; code: double; id: double): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
@@ -150,4 +158,5 @@ def get_error(error: string; code: double; id: double): JsonValue?
 def send_error(var server: WebServer?; error: string; code: double; id: double)
     var res = get_error(error, code, id)
     server->sendStr(write_json(res))
-    delete res
+    unsafe
+        delete res

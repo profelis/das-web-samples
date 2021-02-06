@@ -12,22 +12,25 @@ require debugapi
 def main (fn: string)
     let main_time = stat(fn).mtime
     print("start file {fn} at {main_time} agent:{has_debug_agent()}\n")
-    start_agent()
 
     while true
         let new_time = stat(fn).mtime
         if new_time != main_time
             break
-        sleep(1u)
+        sleep(0u)
         tick_agent()
 
-[init]
-def init_handlers()
+
+[init,export]
+def binit_handlers()
     if is_in_debug_agent_creation() || has_debug_agent()
-        register_handlers()
+        return
+    start_agent()
+    register_handlers()
+
 
 def register_handlers()
-    add_call("reverse", new ScopedFunctionRpcCall(@@reverse_handler))
+    add_call("reverse", @@reverse_handler, this_context())
 
 
 [export]

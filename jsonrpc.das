@@ -62,7 +62,7 @@ class RpcParams
     def getArgN(idx: int): JsonValue?
         if idx >= num
             return null
-        
+
         if params is _array
             return (params as _array)[idx]
         return null
@@ -115,7 +115,7 @@ def as_double(js: JsonValue?): double
         return js as _bool ? 1lf : 0lf
     if js is _string
         return double(js as _string)
-    
+
     return 0lf
 
 def as_float(js: JsonValue?): float
@@ -127,7 +127,7 @@ def as_float(js: JsonValue?): float
         return js as _bool ? 1f : 0f
     if js is _string
         return to_float(js as _string)
-    
+
     return 0f
 
 def as_int(js: JsonValue?): int
@@ -139,5 +139,5 @@ def as_int(js: JsonValue?): int
         return js as _bool ? 1 : 0
     if js is _string
         return to_int(js as _string)
-    
+
     return 0

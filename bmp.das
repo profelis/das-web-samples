@@ -60,7 +60,7 @@ def write_info_header(var res; width, height: int): void
     res |> write(3780) // horizontalResolution
     res |> write(3780) // verticalResolution
     res |> write(uint(0)) // colorTableEntries
-    res |> write(uint(0)) // importantColors 
+    res |> write(uint(0)) // importantColors
 
 
 [private]
