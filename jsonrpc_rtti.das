@@ -1,6 +1,6 @@
 options indenting = 2
 options remove_unused_symbols = false
-module jsonrpc_rtti
+module jsonrpc_rtti shared
 
 require debugapi
 

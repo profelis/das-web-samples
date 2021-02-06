@@ -1,4 +1,6 @@
 options indenting = 2
+options remove_unused_symbols = false
+module server_agent shared
 
 require strings
 require debugapi
@@ -25,21 +27,27 @@ def start(): WebServer?
   return success ? res : null
 
 
+[private]
+def stop()
+  unsafe
+    delete jsonRpc
+    delete server
+
+
 class WebDebugAgent : DapiDebugAgent
   [unused_argument(agent)] def override onInstall ( agent:DebugAgent? ) : void
     server = start()
   [unused_argument(agent)] def override onUninstall ( agent:DebugAgent? ) : void
     if server != null
       server->restart()
-      unsafe
-        delete server
+      stop()
   def override onDestroyContext(ctx: Context)
     if server == null
       return
     unsafe
       let localCtx: Context const & = this_context()
       if addr(localCtx) == addr(ctx)
-        delete server
+        stop()
         return
     var toRemoveCalls: array<string>
     for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)

@@ -1,9 +1,11 @@
 options indenting = 2
 
-require debug_server
 require strings
+
 require daslib/regex
 require daslib/regex_boost
+
+require debug_server
 
 
 var counter = 0

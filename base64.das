@@ -1,3 +1,4 @@
+// https://github.com/GaijinEntertainment/daScript/blob/master/examples/test/base64.das
 options indenting = 2
 options remove_unused_symbols = false
 module base64 shared

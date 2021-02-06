@@ -1,8 +1,9 @@
 options indenting = 2
 
-require debug_server
 require daslib/regex
 require daslib/regex_boost
+
+require debug_server
 
 [export]
 def main (fn:string)

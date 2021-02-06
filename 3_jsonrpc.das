@@ -1,8 +1,9 @@
 options indenting = 2
 
+require daslib/json
+
 require debug_server
 require jsonrpc_handler
-require daslib/json
 
 
 [export]

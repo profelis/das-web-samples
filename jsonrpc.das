@@ -1,6 +1,6 @@
 options indenting = 2
 options remove_unused_symbols = false
-module jsonrpc
+module jsonrpc shared
 
 require strings
 require daslib/json
@@ -73,6 +73,9 @@ class RpcParams
     if params is _object
       return (params as _object)[name]
     return null
+
+def is_null(js: JsonValue?): bool
+  return js == null || js is _null
 
 def is_bool(js: JsonValue?): bool
   return js != null && js is _bool

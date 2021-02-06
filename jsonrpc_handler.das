@@ -1,6 +1,6 @@
 options indenting = 2
 options remove_unused_symbols = false
-module jsonrpc_handler
+module jsonrpc_handler shared
 
 require strings
 
@@ -106,6 +106,7 @@ class JsonRpcHandler
   calls: table<string; RpcCall?>
   notifications: table<string; RpcCall?>
   handlers: table<double; RpcCall?>
+  errorHandlers: array<RpcCall?>
 
   [private] def matchPtr()
     unsafe
@@ -156,7 +157,12 @@ class JsonRpcHandler
       return ""
 
     if match.reqType is error
+      rpcParams->set(match.params)
+      for handler in errorHandlers
+        (*handler)->call(rpcParams, 0lf)
+
       print("[E] id: {match.id} - {msg}\n")
+      return ""
 
     return ""
 

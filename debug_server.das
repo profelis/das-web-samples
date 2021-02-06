@@ -1,6 +1,6 @@
 options indenting = 2
 options remove_unused_symbols = false
-module debug_server
+module debug_server shared
 
 require network
 require fio
