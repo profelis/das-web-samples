@@ -5,17 +5,16 @@ module jsonrpc_boost shared
 
 require ast
 require debugapi public
-require server_agent public
 
 require daslib/ast_boost
 require daslib/template_boost
 
 // [init,export]
-// def register_<func_name>()
+// def register_<func_name>_<bind_name>()
 //   unsafe
 //     let debugAgent = addr(get_debug_agent_context())
 //     if debugAgent != null && debugAgent != addr(this_context())
-//       add_call("reverse", @@reverse_handler)
+//       add_call(<bind_name>, @@<func_name>)
 
 [function_macro(name="rpc_call")]
 class RpcCallAnnotation : AstFunctionAnnotation
