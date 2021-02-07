@@ -3,16 +3,15 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
 
 <!-- vue live component - require http server -->
-<!-- <script src="https://unpkg.com/http-vue-loader"></script> -->
+<script src="https://unpkg.com/http-vue-loader"></script>
 
 <!-- vue js component - works offline -->
-<script src="7_component.js"></script>
+<!-- <script src="7_component.js"></script> -->
 
 <body>
 
   <div id="app">
-    <my-component v-bind="{status}"></my-component>
-    <p> Server time: {{ serverTime }}</p>
+    <my-component></my-component>
     <p>{{ message }}</p>
     <button v-on:click="reverseMessage">Reverse Message</button>
   </div>
@@ -44,8 +43,12 @@
       }
       jrpc.toStream = _msg => socket.send(_msg)
 
-      socket.onerror = error => console.error("Error: " + error.message)
-      socket.onopen = evt => jrpc.notification("whatsup")
+      socket.onopen = data => console.log("socked connected: ", data)
+      socket.onerror = error => console.error("socket error: " + error.message)
+
+      socket.addEventListener('open', (event) => {
+        start()
+      })
 
       socket.onclose = function (event) {
         if (event.wasClean) {
@@ -53,43 +56,42 @@
         } else {
           console.error('Connection suddenly close')
         }
-        console.info('close code : ' + event.code + ' reason: ' + event.reason)
+        console.info('socket close code : ' + event.code + ' reason: ' + event.reason)
         console.log(`reconnect... `)
         setTimeout(createSocket, 1000)
       }
     }
     createSocket()
 
-    var app5 = new Vue({
-      el: '#app',
-      data: {
-        status: "",
-        serverTime: "",
-        message: 'Hello Vue.js!'
-      },
-      methods: {
-        reverseMessage: function () {
-          jrpc.call('reverse', [this.message]).then((data) => this.message = data)
+    var firstStart = true
+    function start() {
+      if (!firstStart)
+        return
+      firstStart = false
+      var app5 = new Vue({
+        el: '#app',
+        data: {
+          message: 'Hello Vue.js!'
+        },
+        methods: {
+          reverseMessage: function () {
+            jrpc.call('reverse', [this.message]).then((data) => this.message = data)
+          }
+        },
+        mounted() {
+          jrpc.on("giveHelp", data => {
+            console.log("giveHelp message ", data)
+            return "help"
+          })
+          console.log("app mounted")
+          jrpc.notification("whatsup")
+        },
+        // vue live component - require http server
+        components: {
+          'my-component': httpVueLoader('7_component.vue')
         }
-      },
-      // vue live component - require http server
-      // components: {
-      //   'my-component': httpVueLoader('7_component.vue')
-      // }
-    })
-
-    jrpc.on("status", data => {
-      console.log("status message ", data)
-      app5.status = data
-    })
-    jrpc.on("serverTime", data => {
-      console.log("serverTime message ", data)
-      app5.serverTime = `${data}`
-    })
-    jrpc.on("giveHelp", data => {
-      console.log("giveHelp message ", data)
-      return "help"
-    })
+      })
+    }
   </script>
 
 </body>
