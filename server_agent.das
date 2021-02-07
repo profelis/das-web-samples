@@ -140,6 +140,43 @@ def add_call(name:string; var fn: function<(var params: RpcParams; id: double): 
     get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, this_context())
 
 [export]
+def _add_error_handler(var call: ScopedRpcCall?)
+  if !verify_in_debug_server()
+    return
+  if verbose
+    print("add error handler\n")
+  jsonRpc->addErrorHandler(call)
+
+[export]
+def add_error_handler(var call: ScopedRpcCall?)
+  if !verify_not_in_debug()
+    return
+  unsafe
+    get_debug_agent_context() |> invoke_in_context("_add_error_handler", call)
+
+[export]
+def _add_error_handler_fn(var fn: function; var ctx: Context)
+  if !verify_in_debug_server()
+    return
+  if verbose
+    print("add error handler\n")
+  jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
+
+[export]
+def add_error_handler(var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
+  if !verify_not_in_debug()
+    return
+  unsafe
+    get_debug_agent_context() |> invoke_in_context("__add_error_handler_fn", fn, ctx)
+
+[export]
+def add_error_handler(var fn: function<(var params: RpcParams; id: double): void>)
+  if !verify_not_in_debug()
+    return
+  unsafe
+    get_debug_agent_context() |> invoke_in_context("__add_error_handler_fn", fn, this_context())
+
+[export]
 def _add_notification(name:string; var call: ScopedRpcCall?)
   if !verify_in_debug_server()
     return
