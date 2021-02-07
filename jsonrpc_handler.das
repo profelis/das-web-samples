@@ -148,7 +148,7 @@ class JsonRpcHandler
 
   def listenUnhandled(var server: WebServer?): void
     server->unhandled() <| @(msg: string; args: array<string>)
-      var res = self->get_error("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
+      var res = self->getError("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
       print("[E] {PARSE_ERROR}: `{msg}`\n")
       let str = write_json(res)
       unsafe
@@ -171,7 +171,7 @@ class JsonRpcHandler
             rpcParams->set(req.params)
             (**ptr)->call(rpcParams, req.id)
         if !found
-          var err = self->get_error("{METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}", METHOD_NOT_FOUND_CODE, req.id)
+          var err = self->getError("{METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}", METHOD_NOT_FOUND_CODE, req.id)
           errors = length(errors) > 0 ? "{errors}\n{write_json(err)}" : write_json(err)
           unsafe
             delete err
@@ -206,39 +206,41 @@ class JsonRpcHandler
   def addResponseHander(id: double; var handler: RpcCall? implicit)
     handlers[id] <- handler
 
-  def send_response(var server: WebServer?; msg: JsonValue?; id: double)
+  def addErrorHandler(var handler: RpcCall? implicit)
+    errorHandlers |> emplace(handler)
+
+  def sendResponse(var server: WebServer?; msg: JsonValue?; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => msg }})
     server->sendStrLf(write_json(res))
     unsafe
       delete res
 
-  def send_request_raw(var server: WebServer?; method: string; params: JsonValue?; id: double): void
+  def sendRequestRaw(var server: WebServer?; method: string; params: JsonValue?; id: double): void
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
     server->sendStrLf(write_json(res))
     unsafe
       delete res
 
-  def send_request(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall? implicit): double
+  def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall? implicit): double
     currentId += 1lf
-    self->send_request_raw(server, method, params, currentId)
+    self->sendRequestRaw(server, method, params, currentId)
     self->addResponseHander(currentId, handler)
     return currentId
 
-  def send_notification(var server: WebServer?; method: string; params: JsonValue?)
+  def sendNotification(var server: WebServer?; method: string; params: JsonValue?)
     var res = JV({{ "jsonrpc" => JV("2.0"); "method" => JV(method); "params" => params }})
     server->sendStrLf(write_json(res))
-    (res as _object) |> erase("params")
     unsafe
       delete res
 
-  def get_error(error: string; code: double; id: double): JsonValue?
+  def getError(error: string; code: double; id: double): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
     if id != 0lf
       (res.value as _object)["id"] = JV(id)
     return res
 
-  def send_error(var server: WebServer?; error: string; code: double; id: double)
-    var res = self->get_error(error, code, id)
+  def sendError(var server: WebServer?; error: string; code: double; id: double)
+    var res = self->getError(error, code, id)
     server->sendStrLf(write_json(res))
     unsafe
       delete res

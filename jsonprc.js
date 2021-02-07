@@ -26,7 +26,7 @@ function createSocket() {
   }
   jrpc.toStream = _msg => socket.send(_msg)
 
-  socket.onopen = data => console.log("socked connected: ", data)
+  socket.onopen = data => console.log("Socket connected: ", data)
   socket.onerror = error => console.error("socket error: " + error.message)
 
   socket.onclose = function (event) {

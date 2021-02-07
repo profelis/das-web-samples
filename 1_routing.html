@@ -10,15 +10,15 @@
     const socket = new WebSocket('ws://localhost:1000')
 
     socket.addEventListener("close", function (event) {
-      console.log('Socked closed ', JSON.stringify(event))
+      console.log('Socket closed ', JSON.stringify(event))
     })
 
     socket.addEventListener("error", function (event) {
-      console.log('Socked error ', JSON.stringify(event))
+      console.log('Socket error ', JSON.stringify(event))
     })
 
     socket.addEventListener('open', function (event) {
-      console.log('Socked connected', event)
+      console.log('Socket connected', event)
       document.getElementById("text").innerText += "socket connected " + JSON.stringify(event) + "\n"
     })
 

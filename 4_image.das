@@ -27,7 +27,7 @@ def main (fn:string)
     bmp::write_array(res, w, h, arr)
     unsafe
       let base <- base64(each(res))
-      jsonRpc->send_response(server, to_string(base), id)
+      jsonRpc->sendResponse(server, JV(to_string(base)), id)
     delete arr
     delete res
 

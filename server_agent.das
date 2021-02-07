@@ -180,7 +180,7 @@ def add_notification(name:string; var fn: function<(var params: RpcParams):void>
 def _send_response(var data: JsonValue?; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_response(server, data, id)
+  jsonRpc->sendResponse(server, data, id)
 
 [export]
 def send_response(var data: JsonValue?; id: double)
@@ -193,7 +193,7 @@ def send_response(var data: JsonValue?; id: double)
 def _send_request_raw(method: string; var params: JsonValue?; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_request_raw(server, method, params, id)
+  jsonRpc->sendRequestRaw(server, method, params, id)
 
 [export]
 def send_request(method: string; var params: JsonValue?; id: double)
@@ -206,7 +206,7 @@ def send_request(method: string; var params: JsonValue?; id: double)
 def _send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_request(server, method, params, new ContextFunctionRpcCall(fn, ctx))
+  jsonRpc->sendRequest(server, method, params, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
 def send_request(method: string; var params: JsonValue?; var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
@@ -226,7 +226,7 @@ def send_request(method: string; var params: JsonValue?; var fn: function<(var p
 def _send_notification(method: string; var params: JsonValue?)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_notification(server, method, params)
+  jsonRpc->sendNotification(server, method, params)
 
 [export]
 def send_notification(method: string; var params: JsonValue?)
@@ -239,7 +239,7 @@ def send_notification(method: string; var params: JsonValue?)
 def _send_error(error: string; code: double; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_error(server, error, code, id)
+  jsonRpc->sendError(server, error, code, id)
 
 [export]
 def send_error(error: string; code: double; id: double)
