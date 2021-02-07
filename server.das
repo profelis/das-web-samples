@@ -93,6 +93,8 @@ class WebServer : Server
     self->sendStr("{str}\n") // use '\n' to split multiple messages on client
 
   def sendStr(str: string)
+    if debugLogs
+      print(":{port} > `{str}`\n")
     unsafe
       self->send(reinterpret<uint8?> str, length(str))
 
@@ -138,6 +140,8 @@ class WebServer : Server
     if length(current_string) > 0
       var found = false
       let str = string(current_string)
+      if debugLogs
+        print(":{port} < `{str}`\n")
       for matcher, idx in matchers, iter_range(matchers)
         let match <- matcher->match(str)
         if match is invalid

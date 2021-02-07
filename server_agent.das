@@ -11,6 +11,9 @@ require jsonrpc_rtti
 require jsonrpc_handler
 require server
 
+var
+  serverDebugLogs = false
+  verbose = false
 
 var
   server: WebServer?
@@ -20,6 +23,7 @@ var
 [private]
 def start(): WebServer?
   var res = new WebServer()
+  res.debugLogs = serverDebugLogs
   jsonRpc = new JsonRpcHandler()
   jsonRpc->listen(res)
   jsonRpc->listenUnhandled(res)
@@ -37,10 +41,12 @@ def stop()
 class WebDebugAgent : DapiDebugAgent
   [unused_argument(agent)] def override onInstall ( agent:DebugAgent? ) : void
     server = start()
+
   [unused_argument(agent)] def override onUninstall ( agent:DebugAgent? ) : void
     if server != null
       server->restart()
       stop()
+
   def override onDestroyContext(ctx: Context)
     if server == null
       return
@@ -58,7 +64,8 @@ class WebDebugAgent : DapiDebugAgent
           toRemoveCalls |> push(name)
 
     for it in toRemoveCalls
-      print("delete call `{it}`\n")
+      if verbose
+        print("delete call `{it}`\n")
       jsonRpc.calls |> erase(it)
 
     var toRemoveNotifications: array<string>
@@ -70,8 +77,10 @@ class WebDebugAgent : DapiDebugAgent
           toRemoveNotifications |> push(name)
 
     for it in toRemoveNotifications
-      print("delete notification `{it}`\n")
+      if verbose
+        print("delete notification `{it}`\n")
       jsonRpc.notifications |> erase(it)
+
   def override onTick() : void
     if server != null
       server->tick()
@@ -97,7 +106,8 @@ def verify_not_in_debug()
 def _add_call(name:string; var call: ScopedRpcCall?)
   if !verify_in_debug_server()
     return
-  print("add call `{name}`\n")
+  if verbose
+    print("add call `{name}`\n")
   jsonRpc->addCall(name, call)
 
 [export]
@@ -111,7 +121,8 @@ def add_call(name:string; var call: ScopedRpcCall?)
 def _add_call_fn(name:string; var fn: function; var ctx: Context)
   if !verify_in_debug_server()
     return
-  print("add call `{name}`\n")
+  if verbose
+    print("add call `{name}`\n")
   jsonRpc->addCall(name, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
@@ -132,7 +143,8 @@ def add_call(name:string; var fn: function<(var params: RpcParams; id: double): 
 def _add_notification(name:string; var call: ScopedRpcCall?)
   if !verify_in_debug_server()
     return
-  print("add notification `{name}`\n")
+  if verbose
+    print("add notification `{name}`\n")
   jsonRpc->addNotification(name, call)
 
 [export]
@@ -146,7 +158,8 @@ def add_notification(name:string; var call: ScopedRpcCall?)
 def _add_notification_fn(name:string; var fn: function; var ctx: Context)
   if !verify_in_debug_server()
     return
-  print("add notification `{name}`\n")
+  if verbose
+    print("add notification `{name}`\n")
   jsonRpc->addNotification(name, new ContextFunctionRpcNotification(fn, ctx))
 
 [export]
@@ -251,7 +264,8 @@ def start_agent(force:bool = false): bool
   if force || !has_debug_agent()
     fork_debug_agent_context(@@start_debug_agent)
   else
-    print("debug agent already exist\n")
+    if verbose
+      print("debug agent already exist\n")
   return true
 
 
