@@ -3,10 +3,10 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
 
 <!-- vue live component - require http server -->
-<script src="https://unpkg.com/http-vue-loader"></script>
+<!-- <script src="https://unpkg.com/http-vue-loader"></script> -->
 
 <!-- vue js component - works offline -->
-<!-- <script src="7_component.js"></script> -->
+<script src="7_component.js"></script>
 
 <body>
 
@@ -87,9 +87,9 @@
           jrpc.notification("whatsup")
         },
         // vue live component - require http server
-        components: {
-          'my-component': httpVueLoader('7_component.vue')
-        }
+        // components: {
+        //   'my-component': httpVueLoader('7_component.vue')
+        // }
       })
     }
   </script>

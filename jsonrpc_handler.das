@@ -63,7 +63,7 @@ class JsonRpcMatch : Matcher
     var js = read_json(str, error)
     return self->parseReqJson(js, true)
 
-  def parseReqJson(js: JsonValue?; ownJson: bool): bool
+  def parseReqJson(var js: JsonValue?; ownJson: bool): bool
     if js == null
       return false
 
@@ -71,9 +71,13 @@ class JsonRpcMatch : Matcher
       var reqLen = requests |> length()
       for it in js as _array
         self->parseReqJson(it, false)
-      if length(requests) > reqLen
+      if ownJson && length(requests) > reqLen
         requests[length(requests) - 1].js = js
-      return true
+        return true
+      if ownJson
+        unsafe
+          delete js
+      return false
 
     var req: JsonRpcReq
     if ownJson
