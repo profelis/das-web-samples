@@ -37,4 +37,4 @@
 - https://github.com/preactjs/preact-custom-element
 
 # TODO
-- batch calls
+- batch calls (done, not tested)

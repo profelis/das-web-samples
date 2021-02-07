@@ -29,73 +29,99 @@ variant JsonRpcReqType
   result: void?
   error: void?
 
-class JsonRpcMatch : Matcher
-  js: JsonValue? = null
+struct JsonRpcReq
+  js: JsonValue?
   id: double = 0lf
   reqType: JsonRpcReqType
   params: JsonValue?
 
+class JsonRpcMatch : Matcher
+  requests: array<JsonRpcReq>
+
   def override match(str: string): MatchResult
-    id = 0lf
-    params = null
-    reqType = [[JsonRpcReqType none=null]]
-    unsafe
-      delete js
+    requests |> clear()
 
     if find(str, "\"jsonrpc\"") < 0
       return <- [[MatchResult invalid = null]]
 
-    var s = strip(str)
-    if !ends_with(s, "}")
-      return <- [[MatchResult invalid = null]]
+    let strLen = length(str)
+    var start = 0
+    for idx, ch in range(strLen), str
+      if ch == '}'
+        self->parseReq(str |> slice(start, idx + 1))
+        start = idx + 1
 
-    var error: string
-    js = read_json(str, error)
-    if js == null
+    if start < strLen - 1
+      self->parseReq(str |> slice(start, strLen - 1))
+
+    if length(requests) == 0
       return <- [[MatchResult invalid = null]]
+    return <- [[MatchResult args <- [{ string[] "" }] ]]
+
+  def parseReq(str: string): bool
+    var error: string
+    var js = read_json(str, error)
+    return self->parseReqJson(js, true)
+
+  def parseReqJson(js: JsonValue?; ownJson: bool): bool
+    if js == null
+      return false
 
     if js is _array
-      // TODO: batch request, return [[MatchResult more = null]]
-      print("unsuppported batch request")
-      return <- [[MatchResult invalid = null]]
+      var reqLen = requests |> length()
+      for it in js as _array
+        self->parseReqJson(it, false)
+      if length(requests) > reqLen
+        requests[length(requests) - 1].js = js
+      return true
+
+    var req: JsonRpcReq
+    if ownJson
+      req.js = js
 
     if js is _object
       var failed = false
       (js as _object) |> find_if_exists("method") <| $(ptr)
         if *ptr.value is _string
-          reqType = [[JsonRpcReqType method=*ptr.value as _string]]
+          req.reqType = [[JsonRpcReqType method=*ptr.value as _string]]
           (js as _object) |> find_if_exists("params") <| $(par)
-            params = *par
+            req.params = *par
         else
           failed = true
 
       if failed // method is not string
-        return <- [[MatchResult invalid = null]]
+        delete req
+        return false
 
-      if reqType is none
+      if req.reqType is none
         (js as _object) |> find_if_exists("result") <| $(ptr)
-          reqType = [[JsonRpcReqType result=null]]
-          params = *ptr
+          req.reqType = [[JsonRpcReqType result=null]]
+          req.params = *ptr
 
-      if reqType is method || reqType is result
+      if req.reqType is method || req.reqType is result
         (js as _object) |> find_if_exists("id") <| $(ptr)
           if *ptr.value is _number
-            id = *ptr.value as _number
+            req.id = *ptr.value as _number
           elif *ptr.value is _string
-            id = double(to_int(*ptr.value as _string))
+            req.id = double(to_int(*ptr.value as _string))
           else
             failed = true
         if failed // invalid id
-          return <- [[MatchResult invalid = null]]
+          delete req
+          return false
 
-      if reqType is none
+      if req.reqType is none
         (js as _object) |> find_if_exists("error") <| $(ptr)
-          reqType = [[JsonRpcReqType error=null]]
-          params = *ptr
+          req.reqType = [[JsonRpcReqType error=null]]
+          req.params = *ptr
 
-      if !(reqType is none)
-        return <- [[MatchResult args <- [{ string[] "" }] ]]
-    return <- [[MatchResult invalid = null]]
+      if !(req.reqType is none)
+        self.requests |> emplace(req)
+        return true
+
+    unsafe
+      delete req
+    return false
 
 
 class JsonRpcHandler
@@ -126,45 +152,46 @@ class JsonRpcHandler
       return str
 
   [unused_argument(msg)] def rpcHandler(msg: string): string
-    var found = false
-    if match.reqType is method
-      if match.id == 0lf
-        notifications |> find_for_edit_if_exists(match.reqType as method) <| $(ptr)
+    var errors = ""
+    for req in match.requests
+      var found = false
+      if req.reqType is method
+        if req.id == 0lf
+          notifications |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
+            found = true
+            rpcParams->set(req.params)
+            (**ptr)->call(rpcParams, 0lf)
+        else
+          calls |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
+            found = true
+            rpcParams->set(req.params)
+            (**ptr)->call(rpcParams, req.id)
+        if !found
+          var err = self->get_error("{METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}", METHOD_NOT_FOUND_CODE, req.id)
+          errors = length(errors) > 0 ? "{errors}\n{write_json(err)}" : write_json(err)
+          unsafe
+            delete err
+          print("[E] {METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}\n")
+        continue
+
+      if req.reqType is result
+        handlers |> find_for_edit_if_exists(req.id) <| $(handler)
           found = true
-          rpcParams->set(match.params)
-          (**ptr)->call(rpcParams, 0lf)
-      else
-        calls |> find_for_edit_if_exists(match.reqType as method) <| $(ptr)
-          found = true
-          rpcParams->set(match.params)
-          (**ptr)->call(rpcParams, match.id)
-      if !found
-        var err = self->get_error("{METHOD_NOT_FOUND}: `{match.reqType as method}` id: {match.id}", METHOD_NOT_FOUND_CODE, match.id)
-        let res = write_json(err)
-        unsafe
-          delete err
-        print("[E] {METHOD_NOT_FOUND}: `{match.reqType as method}` id: {match.id}\n")
-        return res
-      return ""
+          rpcParams->set(req.params)
+          (**handler)->call(rpcParams, 0lf)
+        if !found
+          print("[E] unhandled result id: {req.id} - {msg}\n")
+        continue
 
-    if match.reqType is result
-      handlers |> find_for_edit_if_exists(match.id) <| $(handler)
-        found = true
-        rpcParams->set(match.params)
-        (**handler)->call(rpcParams, 0lf)
-      if !found
-        print("[E] unhandled result id: {match.id} - {msg}\n")
-      return ""
+      if req.reqType is error
+        rpcParams->set(req.params)
+        for handler in errorHandlers
+          (*handler)->call(rpcParams, 0lf)
 
-    if match.reqType is error
-      rpcParams->set(match.params)
-      for handler in errorHandlers
-        (*handler)->call(rpcParams, 0lf)
+        print("[E] id: {req.id} - {msg}\n")
+        continue
 
-      print("[E] id: {match.id} - {msg}\n")
-      return ""
-
-    return ""
+    return errors
 
   def addCall(name: string; var call: RpcCall? implicit)
     calls[name] <- call
