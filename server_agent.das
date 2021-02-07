@@ -209,14 +209,14 @@ def _send_request(method: string; var params: JsonValue?; var fn: function; var 
   jsonRpc->send_request(server, method, params, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
-def send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
+def send_request(method: string; var params: JsonValue?; var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, ctx)
 
 [export]
-def send_request(method: string; var params: JsonValue?; var fn: function)
+def send_request(method: string; var params: JsonValue?; var fn: function<(var params: RpcParams; id: double): void>)
   if !verify_not_in_debug()
     return
   unsafe
