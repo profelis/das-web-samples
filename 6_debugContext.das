@@ -37,7 +37,7 @@ def reverse_handler(var params: RpcParams; id: double)
     verify(addr(get_debug_agent_context()) != addr(this_context()))
 
   let str = params->getArgN(0) |> as_string()
-  send_response(reverse(str), id)
+  send_response(JV(reverse(str)), id)
 
 
 [rpc_notification(name="whatsup")]

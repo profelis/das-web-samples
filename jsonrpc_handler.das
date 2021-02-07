@@ -4,8 +4,8 @@ module jsonrpc_handler shared
 
 require strings
 
-require daslib/json
-require daslib/json_boost
+require daslib/json public
+require daslib/json_boost public
 
 require jsonrpc public
 require server
@@ -206,8 +206,8 @@ class JsonRpcHandler
   def addResponseHander(id: double; var handler: RpcCall? implicit)
     handlers[id] <- handler
 
-  def send_response(var server: WebServer?; msg: string; id: double)
-    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => JV(msg) }})
+  def send_response(var server: WebServer?; msg: JsonValue?; id: double)
+    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => msg }})
     server->sendStrLf(write_json(res))
     unsafe
       delete res
@@ -215,7 +215,6 @@ class JsonRpcHandler
   def send_request_raw(var server: WebServer?; method: string; params: JsonValue?; id: double): void
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
     server->sendStrLf(write_json(res))
-    (res as _object) |> erase("params")
     unsafe
       delete res
 

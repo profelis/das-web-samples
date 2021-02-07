@@ -164,17 +164,17 @@ def add_notification(name:string; var fn: function<(var params: RpcParams):void>
     get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, this_context())
 
 [export]
-def _send_response(msg: string; id: double)
+def _send_response(var data: JsonValue?; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->send_response(server, msg, id)
+  jsonRpc->send_response(server, data, id)
 
 [export]
-def send_response(msg: string; id: double)
+def send_response(var data: JsonValue?; id: double)
   if !verify_not_in_debug()
     return
   unsafe
-    get_debug_agent_context() |> invoke_in_context("_send_response", msg, id)
+    get_debug_agent_context() |> invoke_in_context("_send_response", data, id)
 
 [export]
 def _send_request_raw(method: string; var params: JsonValue?; id: double)
