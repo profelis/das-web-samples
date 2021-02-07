@@ -1,0 +1,96 @@
+<html>
+<script src="./simple-jsonprc-js.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/preact/10.5.12/preact.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/preact-custom-element/4.2.1/preact-custom-element.umd.js"></script>
+<script>window.React = { createElement: preact.h }</script>
+
+<script type="text/babel" data-type="module" src="8_serverTime.js"></script>
+
+<body>
+
+  <div id="app">
+  </div>
+
+  <script>
+    var jrpc = new simple_jsonrpc()
+
+    function createSocket() {
+      var socket = new WebSocket("ws://localhost:1000")
+      socket.onmessage = async event => {
+        let text = await event.data.text()
+        // split multiple json messages in one string
+        let lines = text.split("\n")
+        let i = 0
+        let str = ""
+        for (; i < lines.length; ++i) {
+          str += lines[i]
+          if (lines[i] == "}") {
+            try {
+              JSON.parse(str)
+              jrpc.messageHandler(str)
+              str = ""
+            } catch (e) { }
+          }
+        }
+        if (str.length > 0)
+          jrpc.messageHandler(str)
+      }
+      jrpc.toStream = _msg => socket.send(_msg)
+
+      socket.onerror = error => console.error("Error: " + error.message)
+
+      socket.onclose = function (event) {
+        if (event.wasClean) {
+          console.info('Connection close was clean')
+        } else {
+          console.error('Connection suddenly close')
+        }
+        console.info('close code : ' + event.code + ' reason: ' + event.reason)
+        console.log(`reconnect... `)
+        setTimeout(createSocket, 1000)
+      }
+    }
+    createSocket()
+
+  </script>
+
+  <script type="text/babel">
+
+    jrpc.on("giveHelp", data => {
+      console.log("giveHelp message ", data)
+      return "help"
+    })
+
+    class StatusMessage extends preact.Component {
+      state = { status: "no status" }
+
+      componentDidMount() {
+        jrpc.on("status", data => {
+          console.log("set state. status message ", data)
+          this.setState({ status: data })
+        })
+      }
+
+      render({ }, { status }) {
+        return <p>Status - {status}</p>
+      }
+    }
+
+    class App {
+      componentDidMount() {
+        jrpc.notification("whatsup")
+      }
+      render() {
+        return <p>
+          <StatusMessage />
+          <server-time />
+        </p>
+      }
+    }
+
+    preact.render(<App />, document.body)
+  </script>
+</body>
+
+</html>

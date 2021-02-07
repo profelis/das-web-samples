@@ -24,12 +24,17 @@
 - https://www.jsonrpc.org/specification
 - https://medium.com/front-end-weekly/react-and-vue-without-npm-and-build-2158ceef7082
 - https://deno.land/manual
-- https://babeljs.io/docs/en/babel-standalone
+- https://babeljs.io/docs/en/babel-standalone.html
 
 # Vue.js
 
 - https://vuejs.org/
 - https://github.com/DimanVorosh/vue-json-rpc-websocket
+
+# [P]React
+
+- https://preactjs.com/
+- https://github.com/preactjs/preact-custom-element
 
 # TODO
 - batch calls
