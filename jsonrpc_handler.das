@@ -39,7 +39,7 @@ class JsonRpcMatch : Matcher
   requests: array<JsonRpcReq>
 
   def override match(str: string): MatchResult
-    requests |> clear()
+    delete requests
 
     if find(str, "\"jsonrpc\"") < 0
       return <- [[MatchResult invalid = null]]
@@ -148,8 +148,8 @@ class JsonRpcHandler
 
   def listenUnhandled(var server: WebServer?): void
     server->unhandled() <| @(msg: string; args: array<string>)
-      var res = self->getError("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
       print("[E] {PARSE_ERROR}: `{msg}`\n")
+      var res = self->getError("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
       let str = write_json(res)
       unsafe
         delete res
