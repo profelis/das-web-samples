@@ -115,14 +115,14 @@ def _add_call_fn(name:string; var fn: function; var ctx: Context)
   jsonRpc->addCall(name, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
-def add_call(name:string; var fn: function; var ctx: Context)
+def add_call(name:string; var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, ctx)
 
 [export]
-def add_call(name:string; var fn: function)
+def add_call(name:string; var fn: function<(var params: RpcParams; id: double): void>)
   if !verify_not_in_debug()
     return
   unsafe
@@ -150,14 +150,14 @@ def _add_notification_fn(name:string; var fn: function; var ctx: Context)
   jsonRpc->addNotification(name, new ContextFunctionRpcNotification(fn, ctx))
 
 [export]
-def add_notification(name:string; var fn: function; var ctx: Context)
+def add_notification(name:string; var fn: function<(var params: RpcParams):void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, ctx)
 
 [export]
-def add_notification(name:string; var fn: function)
+def add_notification(name:string; var fn: function<(var params: RpcParams):void>)
   if !verify_not_in_debug()
     return
   unsafe

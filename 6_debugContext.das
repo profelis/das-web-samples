@@ -7,7 +7,7 @@ require debugapi
 require daslib/json
 
 require jsonrpc_handler
-require jsonrpc_rtti
+require jsonrpc_boost
 require server_agent
 
 
@@ -25,29 +25,13 @@ def main (fn: string)
 
 
 [init,export]
-def binit_handlers()
+def first_start()
   if is_in_debug_agent_creation() || has_debug_agent()
     return
   start_agent()
-  // register_handlers()
 
 
-[init,export]
-def init_handlers()
-  unsafe
-    if has_debug_agent() && addr(get_debug_agent_context()) != addr(this_context())
-      register_handlers()
-
-
-def register_handlers()
-  unsafe
-    verify(addr(get_debug_agent_context()) != addr(this_context()))
-
-  add_call("reverse", @@reverse_handler)
-  add_notification("whatsup", @@whatsup_handler)
-
-
-[export]
+[rpc_call(name="reverse")]
 def reverse_handler(var params: RpcParams; id: double)
   unsafe
     verify(addr(get_debug_agent_context()) != addr(this_context()))
@@ -55,7 +39,8 @@ def reverse_handler(var params: RpcParams; id: double)
   let str = params->getArgN(0) |> as_string()
   send_response(reverse(str), id)
 
-[export]
+
+[rpc_notification(name="whatsup")]
 def whatsup_handler(var params: RpcParams)
   unsafe
     verify(addr(get_debug_agent_context()) != addr(this_context()))
@@ -66,7 +51,7 @@ def whatsup_handler(var params: RpcParams)
   send_notification("serverTime", JV(double(ref_time_ticks())))
   send_request("giveHelp", JV(null), @@help_handler)
 
-[export]
+
 def help_handler(var params: RpcParams; id: double)
   unsafe
     verify(addr(get_debug_agent_context()) != addr(this_context()))

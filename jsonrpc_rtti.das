@@ -14,7 +14,7 @@ class ScopedRpcCall : RpcCall
 
 class ScopedFunctionRpcCall : ScopedRpcCall
   fn: function<(var params: RpcParams; id: double):void>
-  def ScopedFunctionRpcCall(var f: function<(var params: RpcParams; id: double):void>)
+  def ScopedFunctionRpcCall(var f: function<(var params: RpcParams; id: double): void>)
     ScopedRpcCall`ScopedRpcCall(self)
     fn <- f
 
@@ -25,7 +25,7 @@ class ScopedFunctionRpcCall : ScopedRpcCall
 
 class ScopedFunctionRpcNotification : ScopedRpcCall
   fn: function<(var params: RpcParams):void>
-  def ScopedFunctionRpcNotification(var f: function<(var params: RpcParams):void>)
+  def ScopedFunctionRpcNotification(var f: function<(var params: RpcParams): void>)
     ScopedRpcCall`ScopedRpcCall(self)
     fn <- f
 
