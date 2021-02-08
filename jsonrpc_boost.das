@@ -21,7 +21,7 @@ require jsonrpc_handler public
 
 [function_macro(name="rpc_call")]
 class RpcCallAnnotation : AstFunctionAnnotation
-  [unused_argument(group)] def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
+  [unused_argument(group)] def override apply (var func: FunctionPtr; var group: ModuleGroup; args: AnnotationArgumentList; var errors: das_string) : bool
     let nameArg = find_arg("name", args)
     if nameArg is nothing
       errors := "name is not defined"
@@ -48,9 +48,8 @@ class RpcCallAnnotation : AstFunctionAnnotation
     rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := func.name]]
     apply_template(rules, at, qblock)
     delete rules
-    var b <- move_unquote_block(qblock)
     unsafe
-      fn.body <- b
+      fn.body <- move_unquote_block(qblock)
 
     compiling_module() |> add_function(fn)
     return true
@@ -58,7 +57,7 @@ class RpcCallAnnotation : AstFunctionAnnotation
 
 [function_macro(name="rpc_notification")]
 class RpcNotificationAnnotation : AstFunctionAnnotation
-  [unused_argument(group)] def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
+  [unused_argument(group)] def override apply (var func: FunctionPtr; var group: ModuleGroup; args: AnnotationArgumentList; var errors: das_string): bool
     let nameArg = find_arg("name", args)
     if nameArg is nothing
       errors := "name is not defined"
@@ -85,9 +84,8 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
     rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := func.name]]
     apply_template(rules, at, qblock)
     delete rules
-    var b <- move_unquote_block(qblock)
     unsafe
-      fn.body <- b
+      fn.body <- move_unquote_block(qblock)
 
     compiling_module() |> add_function(fn)
     return true

@@ -5,8 +5,6 @@ module server shared
 require network
 require strings
 
-require daslib/regex
-
 
 typedef
   Handler = lambda<(message: string; args: array<string>): string>
@@ -26,21 +24,6 @@ class StringMatch : Matcher
     return <- [[MatchResult invalid = null]]
 
 
-class RegexMatch : Matcher
-  matchRe : Regex
-  def RegexMatch(var re: Regex)
-    matchRe <- re
-  def override match(str: string): MatchResult
-    let res = matchRe |> regex_match(str)
-    if res < 0
-      return <- [[MatchResult invalid = null]]
-    var args: array<string>
-    for gr,x in matchRe.groups, range(length(matchRe.groups)-1)
-      let grp = regex_group(matchRe, x+1, str)
-      args |> push(grp)
-    return <- [[MatchResult args <- args ]]
-
-
 class WebServer : Server
   port:int = 9000
   restore_session: string = "server-session"
@@ -57,9 +40,6 @@ class WebServer : Server
 
   def onStr(str: string; var handler: Handler)
     self->on(new StringMatch(str), handler)
-
-  def onRegex(var re: Regex; var handler: Handler)
-    self->on(new RegexMatch(re), handler)
 
   def on(var match: Matcher? implicit; var handler: Handler)
     matchers |> push(match)

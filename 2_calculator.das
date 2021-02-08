@@ -5,6 +5,7 @@ require strings
 require daslib/regex
 require daslib/regex_boost
 
+require regex_match
 require debug_server
 
 
@@ -14,10 +15,10 @@ var counter = 0
 [export]
 def main (fn:string)
   var server = new WebServer()
-  server->onRegex(%regex~\/inc/(.+)%%) <| @(msg: string; args: array<string>)
+  server->on(new RegexMatch(%regex~\/inc/(.+)%%)) <| @(msg: string; args: array<string>)
     counter += to_int(args[0])
     return "{counter}\n"
-  server->onRegex(%regex~\/dec/(.+)$%%) <| @(msg: string; args: array<string>)
+  server->on(new RegexMatch(%regex~\/dec/(.+)$%%)) <| @(msg: string; args: array<string>)
     counter -= to_int(args[0])
     return "{counter}\n"
   server->onStr("/get") <| @(msg: string; args: array<string>)
