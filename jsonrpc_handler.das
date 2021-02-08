@@ -41,7 +41,7 @@ class JsonRpcMatch : Matcher
   def override match(str: string): MatchResult
     delete requests
 
-    if find(str, "\"jsonrpc_call\"") < 0
+    if find(str, "\"jsonrpc\"") < 0
       return <- [[MatchResult invalid = null]]
 
     let strLen = length(str)

@@ -16,7 +16,6 @@ Vue.component('my-component', {
       this.serverTime = `${data}`
     })
 
-    console.log("my comp mounted")
     jrpc.notification("whatsup")
     jrpc.call('reverse', ["foobar"]).then(function (data) { console.log("revers of foobar", data) })
   },

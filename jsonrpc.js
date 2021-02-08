@@ -3,8 +3,12 @@
 var jrpc = new simple_jsonrpc()
 var socket
 
+var newSocketListeners = []
+
 function createSocket() {
   socket = new WebSocket("ws://localhost:1000")
+  for (let fn of newSocketListeners)
+    fn.call(null, socket)
   socket.onmessage = async event => {
     let text = await event.data.text()
     // split multiple json messages in one string
