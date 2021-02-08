@@ -9,6 +9,9 @@ require debugapi public
 require daslib/ast_boost
 require daslib/template_boost
 
+require server_agent public
+require jsonrpc_handler public
+
 // [init,export]
 // def register_<func_name>_<bind_name>()
 //   unsafe
@@ -18,7 +21,7 @@ require daslib/template_boost
 
 [function_macro(name="rpc_call")]
 class RpcCallAnnotation : AstFunctionAnnotation
-  def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
+  [unused_argument(group)] def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
     let nameArg = find_arg("name", args)
     if nameArg is nothing
       errors := "name is not defined"
@@ -55,7 +58,7 @@ class RpcCallAnnotation : AstFunctionAnnotation
 
 [function_macro(name="rpc_notification")]
 class RpcNotificationAnnotation : AstFunctionAnnotation
-  def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
+  [unused_argument(group)] def override apply ( var func:FunctionPtr; var group:ModuleGroup; args:AnnotationArgumentList; var errors : das_string ) : bool
     let nameArg = find_arg("name", args)
     if nameArg is nothing
       errors := "name is not defined"

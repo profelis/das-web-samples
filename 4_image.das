@@ -14,7 +14,7 @@ def main (fn:string)
 
   var jsonRpc = new JsonRpcHandler()
 
-  var sumHandler <- @ <| (var params: RpcParams; id: double)
+  var sumHandler <- @ <| (var params: JsonValue?; id: double)
     let w = 128
     let h = 124
     var arr: array<float3>

@@ -132,7 +132,6 @@ class JsonRpcHandler
   currentId: double = 0lf
 
   match: JsonRpcMatch <- JsonRpcMatch()
-  rpcParams: RpcParams = RpcParams()
   calls: table<string; RpcCall?>
   notifications: table<string; RpcCall?>
   handlers: table<double; RpcCall?>
@@ -163,13 +162,11 @@ class JsonRpcHandler
         if req.id == 0lf
           notifications |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
             found = true
-            rpcParams->set(req.params)
-            (**ptr)->call(rpcParams, 0lf)
+            (**ptr)->call(req.params, 0lf)
         else
           calls |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
             found = true
-            rpcParams->set(req.params)
-            (**ptr)->call(rpcParams, req.id)
+            (**ptr)->call(req.params, req.id)
         if !found
           var err = self->getError("{METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}", METHOD_NOT_FOUND_CODE, req.id)
           errors = length(errors) > 0 ? "{errors}\n{write_json(err)}" : write_json(err)
@@ -181,18 +178,16 @@ class JsonRpcHandler
       if req.reqType is result
         handlers |> find_for_edit_if_exists(req.id) <| $(handler)
           found = true
-          rpcParams->set(req.params)
-          (**handler)->call(rpcParams, 0lf)
+          (**handler)->call(req.params, 0lf)
         if !found
           print("[E] unhandled result id: {req.id} - {msg}\n")
         continue
 
       if req.reqType is error
-        rpcParams->set(req.params)
         for handler in errorHandlers
-          (*handler)->call(rpcParams, 0lf)
+          (*handler)->call(req.params, 0lf)
 
-        print("[E] id: {req.id} - {msg}\n")
+        print("[E] unknown error id: {req.id} - {msg}\n")
         continue
 
     return errors

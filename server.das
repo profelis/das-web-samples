@@ -83,6 +83,12 @@ class WebServer : Server
       print("[W] :{port} unhandled req `{string(current_string)}`")
       current_string |> clear()
 
+  def finalize()
+    if debugLogs
+      print(":{port} destroy server\n")
+    unsafe
+      delete _server
+
   def restart
     if _server != null
       var session : smart_ptr<NetworkServer>

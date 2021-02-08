@@ -41,20 +41,21 @@ def stop()
 class WebDebugAgent : DapiDebugAgent
   [unused_argument(agent)] def override onInstall ( agent:DebugAgent? ) : void
     server = start()
+    if verbose
+      print("start server on agent {agent} ctx: {this_context()}\n")
 
   [unused_argument(agent)] def override onUninstall ( agent:DebugAgent? ) : void
     if server != null
-      server->restart()
+      // server->restart()
       stop()
+      if verbose
+        print("stopServer on agent {agent} ctx: {this_context()}\n")
 
   def override onDestroyContext(ctx: Context)
+    if verbose
+      print("onDestroyContext `{ctx}`\n")
     if server == null
       return
-    unsafe
-      let localCtx: Context const & = this_context()
-      if addr(localCtx) == addr(ctx)
-        stop()
-        return
     var toRemoveCalls: array<string>
     for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)
       unsafe
@@ -80,6 +81,11 @@ class WebDebugAgent : DapiDebugAgent
       if verbose
         print("delete notification `{it}`\n")
       jsonRpc.notifications |> erase(it)
+
+    unsafe
+      let localCtx: Context const & = this_context()
+      if addr(localCtx) == addr(ctx)
+        stop()
 
   def override onTick() : void
     if server != null
@@ -108,7 +114,7 @@ def _add_call(name:string; var call: ScopedRpcCall?)
     return
   if verbose
     print("add call `{name}`\n")
-  jsonRpc->addCall(name, call)
+  jsonRpc->addCall(clone_string(name), call)
 
 [export]
 def add_call(name:string; var call: ScopedRpcCall?)
@@ -123,17 +129,17 @@ def _add_call_fn(name:string; var fn: function; var ctx: Context)
     return
   if verbose
     print("add call `{name}`\n")
-  jsonRpc->addCall(name, new ContextFunctionRpcCall(fn, ctx))
+  jsonRpc->addCall(clone_string(name), new ContextFunctionRpcCall(fn, ctx))
 
 [export]
-def add_call(name:string; var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
+def add_call(name:string; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, ctx)
 
 [export]
-def add_call(name:string; var fn: function<(var params: RpcParams; id: double): void>)
+def add_call(name:string; var fn: function<(var params: JsonValue?; id: double): void>)
   if !verify_not_in_debug()
     return
   unsafe
@@ -163,18 +169,18 @@ def _add_error_handler_fn(var fn: function; var ctx: Context)
   jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
 
 [export]
-def add_error_handler(var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
+def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
-    get_debug_agent_context() |> invoke_in_context("__add_error_handler_fn", fn, ctx)
+    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, ctx)
 
 [export]
-def add_error_handler(var fn: function<(var params: RpcParams; id: double): void>)
+def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>)
   if !verify_not_in_debug()
     return
   unsafe
-    get_debug_agent_context() |> invoke_in_context("__add_error_handler_fn", fn, this_context())
+    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, this_context())
 
 [export]
 def _add_notification(name:string; var call: ScopedRpcCall?)
@@ -182,7 +188,7 @@ def _add_notification(name:string; var call: ScopedRpcCall?)
     return
   if verbose
     print("add notification `{name}`\n")
-  jsonRpc->addNotification(name, call)
+  jsonRpc->addNotification(clone_string(name), call)
 
 [export]
 def add_notification(name:string; var call: ScopedRpcCall?)
@@ -197,17 +203,17 @@ def _add_notification_fn(name:string; var fn: function; var ctx: Context)
     return
   if verbose
     print("add notification `{name}`\n")
-  jsonRpc->addNotification(name, new ContextFunctionRpcNotification(fn, ctx))
+  jsonRpc->addNotification(clone_string(name), new ContextFunctionRpcNotification(fn, ctx))
 
 [export]
-def add_notification(name:string; var fn: function<(var params: RpcParams):void>; var ctx: Context)
+def add_notification(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, ctx)
 
 [export]
-def add_notification(name:string; var fn: function<(var params: RpcParams):void>)
+def add_notification(name:string; var fn: function<(var params: JsonValue?):void>)
   if !verify_not_in_debug()
     return
   unsafe
@@ -246,14 +252,14 @@ def _send_request(method: string; var params: JsonValue?; var fn: function; var 
   jsonRpc->sendRequest(server, method, params, new ContextFunctionRpcCall(fn, ctx))
 
 [export]
-def send_request(method: string; var params: JsonValue?; var fn: function<(var params: RpcParams; id: double): void>; var ctx: Context)
+def send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, ctx)
 
 [export]
-def send_request(method: string; var params: JsonValue?; var fn: function<(var params: RpcParams; id: double): void>)
+def send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>)
   if !verify_not_in_debug()
     return
   unsafe

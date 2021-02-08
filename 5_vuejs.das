@@ -12,8 +12,8 @@ def main (fn:string)
 
   var jsonRpc = new JsonRpcHandler()
 
-  var reverseHandler <- @ <| (var params: RpcParams; id: double)
-    let str = params->getArgN(0) |> as_string()
+  var reverseHandler <- @ <| (var params: JsonValue?; id: double)
+    let str = params |> get_arg(0) |> as_string()
     jsonRpc->sendResponse(server, JV(reverse(str)), id)
 
   jsonRpc->addCall("reverse", new LambdaRpcCall(reverseHandler))

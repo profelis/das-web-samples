@@ -3,76 +3,67 @@ options remove_unused_symbols = false
 module jsonrpc shared
 
 require strings
-require daslib/json
-require daslib/json_boost
-require server
+require daslib/json public
+require daslib/json_boost public
+
 
 
 class RpcCall
-  def abstract call(var params: RpcParams; id: double): void
+  def abstract call(var params: JsonValue?; id: double): void
 
 class LambdaRpcCall : RpcCall
-  fn: lambda<(var params: RpcParams; id: double):void>
-  def LambdaRpcCall(var f: lambda<(var params: RpcParams; id: double):void>)
+  fn: lambda<(var params: JsonValue?; id: double):void>
+  def LambdaRpcCall(var f: lambda<(var params: JsonValue?; id: double):void>)
     fn <- f
 
-  def override call(var params: RpcParams; id:double): void
+  def override call(var params: JsonValue?; id:double): void
     invoke(fn, params, id)
 
 
 class LambdaRpcNotification : RpcCall
-  fn: lambda<(var params: RpcParams):void>
-  def LambdaRpcNotification(var f: lambda<(var params: RpcParams):void>)
+  fn: lambda<(var params: JsonValue?):void>
+  def LambdaRpcNotification(var f: lambda<(var params: JsonValue?):void>)
     fn <- f
 
-  [unused_argument(id)] def override call(var params: RpcParams; id:double): void
+  [unused_argument(id)] def override call(var params: JsonValue?; id:double): void
     invoke(fn, params)
 
 
 class FunctionRpcCall : RpcCall
-  fn: function<(var params: RpcParams; id: double):void>
-  def FunctionRpcCall(var f: function<(var params: RpcParams; id: double):void>)
+  fn: function<(var params: JsonValue?; id: double):void>
+  def FunctionRpcCall(var f: function<(var params: JsonValue?; id: double):void>)
     fn <- f
 
-  def override call(var params: RpcParams; id:double): void
+  def override call(var params: JsonValue?; id:double): void
     invoke(fn, params, id)
 
 
 class FunctionRpcNotification : RpcCall
-  fn: function<(var params: RpcParams):void>
-  def FunctionRpcNotification(var f: function<(var params: RpcParams):void>)
+  fn: function<(var params: JsonValue?):void>
+  def FunctionRpcNotification(var f: function<(var params: JsonValue?):void>)
     fn <- f
 
-  [unused_argument(id)] def override call(var params: RpcParams; id:double): void
+  [unused_argument(id)] def override call(var params: JsonValue?; id:double): void
     invoke(fn, params)
 
-
-class RpcParams
-  params: JsonValue?
-  num : int = 0
-  def set(data: JsonValue?)
-    params = data
-    num = 0
-    if params != null
-      if params is _array
-        num = length(params as _array)
-      elif params is _object
-        num = length(params as _object)
-
-  def getArgN(idx: int): JsonValue?
-    if idx == 0 && num == 0
-      return params
-    if idx >= num
-      return null
-
-    if params is _array
-      return (params as _array)[idx]
+def get_arg(params: JsonValue?; idx: int): JsonValue?
+  if params == null
     return null
+  if params is _array
+    let arr & = params.value as _array
+    return idx <= length(arr) ? arr[idx] : null
+  return idx == 0 && !(params is _object) ? params : null
 
-  def getArg(name: string): JsonValue?
-    if params is _object
-      return (params as _object)[name]
+def get_arg_name(params: JsonValue?; name: string): JsonValue?
+  if params == null
     return null
+  if params is _object
+    let obj & = params as _object
+    var res : JsonValue? = null
+    obj |> find(name) <| $(sub)
+      res = *sub
+    return res
+  return null
 
 def is_null(js: JsonValue?): bool
   return js == null || js is _null
