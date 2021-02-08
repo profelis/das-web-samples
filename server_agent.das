@@ -2,10 +2,7 @@ options indenting = 2
 options remove_unused_symbols = false
 module server_agent shared
 
-require strings
 require debugapi
-
-require daslib/json
 
 require jsonrpc_rtti
 require jsonrpc_handler
@@ -108,23 +105,9 @@ def verify_not_in_debug()
     verify(debugAgent != addr(this_context()))
   return true
 
-[export]
-def _add_call(name:string; var call: ScopedRpcCall?)
-  if !verify_in_debug_server()
-    return
-  if verbose
-    print("add call `{name}`\n")
-  jsonRpc->addCall(clone_string(name), call)
 
 [export]
-def add_call(name:string; var call: ScopedRpcCall?)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_add_call", name, call)
-
-[export]
-def _add_call_fn(name:string; var fn: function; var ctx: Context)
+def _add_call_fn(name:string; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_in_debug_server()
     return
   if verbose
@@ -146,43 +129,6 @@ def add_call(name:string; var fn: function<(var params: JsonValue?; id: double):
     get_debug_agent_context() |> invoke_in_context("_add_call_fn", name, fn, this_context())
 
 [export]
-def _add_error_handler(var call: ScopedRpcCall?)
-  if !verify_in_debug_server()
-    return
-  if verbose
-    print("add error handler\n")
-  jsonRpc->addErrorHandler(call)
-
-[export]
-def add_error_handler(var call: ScopedRpcCall?)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_add_error_handler", call)
-
-[export]
-def _add_error_handler_fn(var fn: function; var ctx: Context)
-  if !verify_in_debug_server()
-    return
-  if verbose
-    print("add error handler\n")
-  jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
-
-[export]
-def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, ctx)
-
-[export]
-def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, this_context())
-
-[export]
 def _add_notification(name:string; var call: ScopedRpcCall?)
   if !verify_in_debug_server()
     return
@@ -198,7 +144,7 @@ def add_notification(name:string; var call: ScopedRpcCall?)
     get_debug_agent_context() |> invoke_in_context("add_notification", name, call)
 
 [export]
-def _add_notification_fn(name:string; var fn: function; var ctx: Context)
+def _add_notification_fn(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context)
   if !verify_in_debug_server()
     return
   if verbose
@@ -218,6 +164,28 @@ def add_notification(name:string; var fn: function<(var params: JsonValue?):void
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_add_notification_fn", name, fn, this_context())
+
+[export]
+def _add_error_handler_fn(var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
+  if !verify_in_debug_server()
+    return
+  if verbose
+    print("add error handler\n")
+  jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
+
+[export]
+def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
+  if !verify_not_in_debug()
+    return
+  unsafe
+    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, ctx)
+
+[export]
+def add_error_handler(var fn: function<(var params: JsonValue?; id: double): void>)
+  if !verify_not_in_debug()
+    return
+  unsafe
+    get_debug_agent_context() |> invoke_in_context("_add_error_handler_fn", fn, this_context())
 
 [export]
 def _send_response(var data: JsonValue?; id: double)
@@ -246,7 +214,7 @@ def send_request(method: string; var params: JsonValue?; id: double)
     get_debug_agent_context() |> invoke_in_context("_send_request_raw", method, params, id)
 
 [export]
-def _send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
+def _send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_in_debug_server()
     return
   jsonRpc->sendRequest(server, method, params, new ContextFunctionRpcCall(fn, ctx))

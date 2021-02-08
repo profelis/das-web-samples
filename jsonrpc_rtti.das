@@ -13,8 +13,8 @@ class ScopedRpcCall : RpcCall
 
 
 class ContextFunctionRpcCall : ScopedRpcCall
-  fn: function
-  def ContextFunctionRpcCall(var f: function; var context: Context)
+  fn: function<(var params: JsonValue?; id: double): void>
+  def ContextFunctionRpcCall(var f: function<(var params: JsonValue?; id: double): void>; var context: Context)
     unsafe
       ctx = addr(context)
     fn <- f
@@ -25,8 +25,8 @@ class ContextFunctionRpcCall : ScopedRpcCall
 
 
 class ContextFunctionRpcNotification : ScopedRpcCall
-  fn: function
-  def ContextFunctionRpcNotification(var f: function; var context: Context)
+  fn: function<(var params: JsonValue?):void>
+  def ContextFunctionRpcNotification(var f: function<(var params: JsonValue?):void>; var context: Context)
     unsafe
       ctx = addr(context)
     fn <- f
