@@ -7,7 +7,7 @@ require strings
 require daslib/json public
 require daslib/json_boost public
 
-require jsonrpc public
+require jsonrpc_call public
 require server
 
 let
@@ -41,7 +41,7 @@ class JsonRpcMatch : Matcher
   def override match(str: string): MatchResult
     delete requests
 
-    if find(str, "\"jsonrpc\"") < 0
+    if find(str, "\"jsonrpc_call\"") < 0
       return <- [[MatchResult invalid = null]]
 
     let strLen = length(str)

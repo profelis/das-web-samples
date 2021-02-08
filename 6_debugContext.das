@@ -4,6 +4,7 @@ require fio
 require strings
 
 require jsonrpc_boost
+require jsonrpc_utils
 
 
 [export]
@@ -42,8 +43,8 @@ def whatsup_handler(var params: JsonValue?)
 
   let arg0 = params |> get_arg(0)
   print("whatsup!!! arg0: {arg0}\n")
-  send_notification("status", JV(42lf))
-  send_notification("serverTime", JV(double(ref_time_ticks())))
+  send_notification("status", JV(42))
+  send_notification("serverTime", JV(ref_time_ticks()))
   send_request("giveHelp", JV(null), @@help_handler)
 
 

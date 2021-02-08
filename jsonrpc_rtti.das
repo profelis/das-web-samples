@@ -6,7 +6,7 @@ require debugapi
 require rtti
 require daslib/json
 
-require jsonrpc
+require jsonrpc_call
 
 class ScopedRpcCall : RpcCall
   ctx: rtti::Context?

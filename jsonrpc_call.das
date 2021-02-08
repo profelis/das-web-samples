@@ -1,11 +1,10 @@
 options indenting = 2
 options remove_unused_symbols = false
-module jsonrpc shared
+module jsonrpc_call shared
 
 require strings
 require daslib/json public
 require daslib/json_boost public
-
 
 
 class RpcCall
@@ -65,8 +64,15 @@ def get_arg_name(params: JsonValue?; name: string): JsonValue?
     return res
   return null
 
+
 def is_null(js: JsonValue?): bool
   return js == null || js is _null
+
+def is_array(js: JsonValue?): bool
+  return js != null && js is _array
+
+def is_object(js: JsonValue?): bool
+  return js != null && js is _object
 
 def is_bool(js: JsonValue?): bool
   return js != null && js is _bool
@@ -79,7 +85,7 @@ def as_bool(js: JsonValue?): bool
   if js is _number
     return (js as _number) != 0lf
   if js is _string
-    return to_int(js as _string) != 0
+    return to_float(js as _string) != 0f
   return js is _object || js is _array
 
 def is_string(js: JsonValue?): bool
