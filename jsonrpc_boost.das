@@ -30,6 +30,8 @@ class RpcCallAnnotation : AstFunctionAnnotation
       errors := "name should be string value"
       return false
     func.flags |= FunctionFlags exports
+    for arg in func.arguments
+      arg.flags |= VariableFlags marked_used
     let at = func.at
     var fn <- new [[Function() at = at, atDecl = at, name := "register_{func.name}_{nameArg as tString}"]]
     fn.flags |= FunctionFlags generated
@@ -66,6 +68,8 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
       errors := "name should be string value"
       return false
     func.flags |= FunctionFlags exports
+    for arg in func.arguments
+      arg.flags |= VariableFlags marked_used
     let at = func.at
     var fn <- new [[Function() at = at, atDecl = at, name := "register_{func.name}_{nameArg as tString}"]]
     fn.flags |= FunctionFlags generated
