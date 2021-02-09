@@ -191,7 +191,7 @@ def add_error_handler(var fn: function<(var params: JsonValue?; id: double): voi
 def _send_response(var data: JsonValue?; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendResponse(server, data, id)
+  jsonRpc->sendResponseStr(server, write_json(data), id)
 
 [export]
 def send_response(var data: JsonValue?; id: double)
@@ -201,23 +201,10 @@ def send_response(var data: JsonValue?; id: double)
     get_debug_agent_context() |> invoke_in_context("_send_response", data, id)
 
 [export]
-def _send_request_raw(method: string; var params: JsonValue?; id: double)
-  if !verify_in_debug_server()
-    return
-  jsonRpc->sendRequestRaw(server, method, params, id)
-
-[export]
-def send_request(method: string; var params: JsonValue?; id: double)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_send_request_raw", method, params, id)
-
-[export]
 def _send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendRequest(server, method, params, new ContextFunctionRpcCall(fn, ctx))
+  jsonRpc->sendRequestStr(server, method, write_json(params), new ContextFunctionRpcCall(fn, ctx))
 
 [export]
 def send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
@@ -237,7 +224,7 @@ def send_request(method: string; var params: JsonValue?; var fn: function<(var p
 def _send_notification(method: string; var params: JsonValue?)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendNotification(server, method, params)
+  jsonRpc->sendNotificationStr(server, method, write_json(params))
 
 [export]
 def send_notification(method: string; var params: JsonValue?)

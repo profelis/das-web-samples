@@ -12,21 +12,24 @@ function createSocket() {
   socket.onmessage = async event => {
     let text = await event.data.text()
     // split multiple json messages in one string
-    let lines = text.split("\n")
-    let i = 0;
-    let str = ""
-    for (; i < lines.length; ++i) {
-      str += lines[i]
-      if (lines[i] == "}") {
+    let start = 0
+    for (let i = 0; i < text.length; ++i) {
+      if (text[i] == "}" || text[i] == "]") {
         try {
-          JSON.parse(str)
-          jrpc.messageHandler(str)
-          str = ""
-        } catch (e) { }
+          let sub = text.substring(start, i + 1)
+          JSON.parse(sub)
+          jrpc.messageHandler(sub)
+          start = i + 1
+        } catch (e) {
+          console.log("can't parse", text.substring(start, i + 1))
+         }
       }
     }
-    if (str.length > 0)
-      jrpc.messageHandler(str)
+    if (start < text.length - 1)
+    {
+      let sub = text.substring(start)
+      jrpc.messageHandler(sub)
+    }
   }
   jrpc.toStream = _msg => socket.send(_msg)
 

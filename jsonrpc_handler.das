@@ -39,7 +39,10 @@ class JsonRpcMatch : Matcher
   requests: array<JsonRpcReq>
 
   def override match(str: string): MatchResult
-    delete requests
+    for it in requests
+      it.params = null // it.js point to same json data
+      delete it
+    requests |> clear()
 
     if find(str, "\"jsonrpc\"") < 0
       return <- [[MatchResult invalid = null]]
@@ -204,27 +207,45 @@ class JsonRpcHandler
   def addErrorHandler(var handler: RpcCall? implicit)
     errorHandlers |> emplace(handler)
 
+  def sendResponseStr(var server: WebServer?; msg: string; id: double)
+    var res = "\{\"jsonrpc\": \"2.0\", \"result\": {msg}, \"id\": {int(id)}\}"
+    server->sendStr(res)
+
   def sendResponse(var server: WebServer?; msg: JsonValue?; id: double)
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => msg }})
-    server->sendStrLf(write_json(res))
+    server->sendStr(write_json(res))
     unsafe
       delete res
 
   def sendRequestRaw(var server: WebServer?; method: string; params: JsonValue?; id: double): void
     var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
-    server->sendStrLf(write_json(res))
+    server->sendStr(write_json(res))
     unsafe
       delete res
 
+  def sendRequestRawStr(var server: WebServer?; method: string; params: string; id: double): void
+    var res = "\{\"jsonrpc\": \"2.0\", \"method\": \"{method}\", \"params\": {params}, \"id\": {int(id)}\}"
+    server->sendStr(res)
+
+  def sendRequestStr(var server: WebServer?; method: string; params: string; var handler: RpcCall? implicit): double
+    currentId += 1lf
+    self->addResponseHander(currentId, handler)
+    self->sendRequestRawStr(server, method, params, currentId)
+    return currentId
+
   def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall? implicit): double
     currentId += 1lf
-    self->sendRequestRaw(server, method, params, currentId)
     self->addResponseHander(currentId, handler)
+    self->sendRequestRaw(server, method, params, currentId)
     return currentId
+
+  def sendNotificationStr(var server: WebServer?; method: string; params: string)
+    var res = "\{\"jsonrpc\": \"2.0\", \"method\": \"{method}\", \"params\": {params}\}"
+    server->sendStr(res)
 
   def sendNotification(var server: WebServer?; method: string; params: JsonValue?)
     var res = JV({{ "jsonrpc" => JV("2.0"); "method" => JV(method); "params" => params }})
-    server->sendStrLf(write_json(res))
+    server->sendStr(write_json(res))
     unsafe
       delete res
 
@@ -236,6 +257,6 @@ class JsonRpcHandler
 
   def sendError(var server: WebServer?; error: string; code: double; id: double)
     var res = self->getError(error, code, id)
-    server->sendStrLf(write_json(res))
+    server->sendStr(write_json(res))
     unsafe
       delete res
