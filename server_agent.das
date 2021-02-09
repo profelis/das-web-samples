@@ -8,13 +8,25 @@ require jsonrpc_rtti
 require jsonrpc_handler
 require server
 
+let
+  initialstrLimit = uint64(2 * 1024 * 1024)
+
 var
   serverDebugLogs = false
   verbose = false
+  strLimit = initialstrLimit
 
 var
   server: WebServer?
   jsonRpc: JsonRpcHandler?
+
+
+def bytes_hr(value : uint64)
+  if value > uint64(1024 * 1024)
+    return "{float(value) / (1024f * 1024f)}mb ({int(value)})"
+  if value > uint64(1024)
+    return "{float(value) / 1024f}kb ({int(value)})"
+  return "{int(value)} b"
 
 
 [private]
@@ -87,6 +99,24 @@ class WebDebugAgent : DapiDebugAgent
   def override onTick() : void
     if server != null
       server->tick()
+
+    var alloc = string_heap_bytes_allocated()
+    if alloc > strLimit
+      // string_heap_report()
+      var report = "STRING HEAP COLLECT: {bytes_hr(alloc)} -> "
+      unsafe
+        string_heap_collect()
+      alloc = string_heap_bytes_allocated()
+      if verbose
+        print("{report}{bytes_hr(alloc)} limit : {bytes_hr(strLimit)}\n")
+      if alloc > strLimit
+        strLimit *= uint64(2)
+        if verbose
+          print("UP string heap limit: {bytes_hr(strLimit)}\n")
+      elif strLimit > initialstrLimit && alloc < strLimit / uint64(2)
+        strLimit = strLimit / uint64(2)
+        if verbose
+          print("DOWN string heap limit: {bytes_hr(strLimit)}\n")
 
 def verify_in_debug_server()
   unsafe
