@@ -38,7 +38,7 @@ struct JsonRpcReq
 class JsonRpcMatch : Matcher
   requests: array<JsonRpcReq>
 
-  def clean()
+  def clean(): void
     for it in requests
       it.params = null // it.js point to same json data
       delete it
@@ -68,9 +68,14 @@ class JsonRpcMatch : Matcher
     return <- [[MatchResult success = end ]]
 
   def parseReq(str: string): bool
+    var res = false
+    try
     var error: string
     var js = read_json(str, error)
-    return self->parseReqJson(js, true)
+      res = self->parseReqJson(js, true)
+    recover
+      print("[E] unhandled error in JsonRpcMatch::parseReq:\n{str}\n")
+    return res
 
   def parseReqJson(var js: JsonValue?; ownJson: bool): bool
     if js == null
@@ -196,7 +201,7 @@ class JsonRpcHandler
         for handler in errorHandlers
           (*handler)->call(req.params, 0lf)
 
-        print("[E] unknown error id: {req.id} - {msg}\n")
+        print("[E] response error id: {req.id} - {msg}\n{write_json(req.params)}\n")
         continue
 
     match->clean()
