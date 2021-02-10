@@ -19,4 +19,4 @@ class RegexMatch : Matcher
     for gr,x in matchRe.groups, range(length(matchRe.groups)-1)
       let grp = regex_group(matchRe, x+1, str)
       args |> push(grp)
-    return <- [[MatchResult args <- args ]]
+    return <- [[MatchResult success <- [[auto args, res + 1 ]] ]]

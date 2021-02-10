@@ -38,28 +38,35 @@ struct JsonRpcReq
 class JsonRpcMatch : Matcher
   requests: array<JsonRpcReq>
 
-  def override match(str: string): MatchResult
+  def clean()
     for it in requests
       it.params = null // it.js point to same json data
       delete it
     requests |> clear()
+
+  def override match(str: string): MatchResult
+    self->clean()
 
     if find(str, "\"jsonrpc\"") < 0
       return <- [[MatchResult invalid = null]]
 
     let strLen = length(str)
     var start = 0
+    var end = 0
     for idx, ch in range(strLen), str
       if ch == '}' || ch == ']'
         if self->parseReq(str |> slice(start, idx + 1))
           start = idx + 1
+          end = idx
 
     if start < strLen - 1
-      self->parseReq(str |> slice(start, strLen - 1))
+      if self->parseReq(str |> slice(start, strLen))
+        end = strLen - 1
 
     if length(requests) == 0
       return <- [[MatchResult invalid = null]]
-    return <- [[MatchResult args <- [{ string[] "" }] ]]
+    end += 1
+    return <- [[MatchResult success <- [[auto [{ string[] "" }], end]] ]]
 
   def parseReq(str: string): bool
     var error: string
@@ -193,6 +200,7 @@ class JsonRpcHandler
         print("[E] unknown error id: {req.id} - {msg}\n")
         continue
 
+    match->clean()
     return errors
 
   def addCall(name: string; var call: RpcCall? implicit)

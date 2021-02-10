@@ -8,7 +8,7 @@ require strings
 
 typedef
   Handler = lambda<(message: string; args: array<string>): string>
-  MatchResult = variant<args: array<string>; invalid: void?; more: void?>
+  MatchResult = variant<success: tuple<args: array<string>; size: int>; invalid: void?; more: void?>
 
 class Matcher
   def abstract match(str: string): MatchResult
@@ -20,7 +20,7 @@ class StringMatch : Matcher
     matchStr = str
   def override match(str: string): MatchResult
     if str == matchStr
-      return <- [[MatchResult args <- [{ auto[] str }] ]]
+      return <- [[MatchResult success <- [[auto [{ auto[] str }], length(str) ]] ]]
     return <- [[MatchResult invalid = null]]
 
 
@@ -92,38 +92,25 @@ class WebServer : Server
         continue
 
       if int(ch) == '\n' && length(current_string) > 0
-        let str = string(current_string)
-        if debugLogs
-          print(":{port} < `{str}`\n")
-        var found = false
-        var needMore = false
-        for matcher, idx in matchers, iter_range(matchers)
-          let match <- matcher->match(str)
-          if match is invalid
-            continue
-          if match is more
-            needMore = true
-            continue
-          found = true
-          let res = invoke(handlers[idx], str, match as args)
-          if length(res) > 0
-            self->sendStr(res)
-          break
-        if !found
-          if needMore // no matches, but somebody wants more
+        var res = self->processCurrentString()
+        if !res.found
+          if res.needMore // no matches, but somebody wants more
             current_string |> push(ch)
             continue
           if unhandledHandler != null
-            let res = invoke(unhandledHandler, str, [[array<string>]])
-            if length(res) > 0
-              self->sendStr(res)
-        current_string |> clear()
+            let unhandledRes = invoke(unhandledHandler, string(current_string), [[array<string>]])
+            if length(unhandledRes) > 0
+              self->sendStr(unhandledRes)
+            current_string |> clear()
         continue
 
       current_string |> push(ch)
+    self->processCurrentString()
 
+  def processCurrentString(): tuple<found: bool; needMore: bool>
+    var found = false
+    var needMore = false
     if length(current_string) > 0
-      var found = false
       let str = string(current_string)
       if debugLogs
         print(":{port} < `{str}`\n")
@@ -132,13 +119,22 @@ class WebServer : Server
         if match is invalid
           continue
         if match is more
+          needMore = true
           continue
         found = true
-        let res = invoke(handlers[idx], str, match as args)
+        let matchData & = match as success
+        let res = invoke(handlers[idx], str, matchData.args)
         if length(res) > 0
           self->sendStr(res)
-        current_string |> clear()
+        let len = matchData.size
+        if len >= length(str)
+          current_string |> clear()
+        else
+          for i in range(length(str) - len)
+            current_string[i] = current_string[len + i]
+          current_string |> resize(length(str) - len)
         break
+    return [[auto found, needMore]]
 
 
 def start_server(var server: WebServer?): bool

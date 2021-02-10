@@ -36,7 +36,7 @@
       mounted() {
         jrpc.on("giveHelp", data => {
           console.log("giveHelp message ", data)
-          return "help"
+          return data
         })
       },
       // vue live component - require http server

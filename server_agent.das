@@ -9,12 +9,12 @@ require jsonrpc_handler
 require server
 
 let
-  initialstrLimit = uint64(2 * 1024 * 1024)
+  initialStrLimit = uint64(2 * 1024 * 1024)
 
 var
   serverDebugLogs = false
   verbose = false
-  strLimit = initialstrLimit
+  strLimit = initialStrLimit
 
 var
   server: WebServer?
@@ -113,7 +113,7 @@ class WebDebugAgent : DapiDebugAgent
         strLimit *= uint64(2)
         if verbose
           print("UP string heap limit: {bytes_hr(strLimit)}\n")
-      elif strLimit > initialstrLimit && alloc < strLimit / uint64(2)
+      elif strLimit > initialStrLimit && alloc < strLimit / uint64(2)
         strLimit = strLimit / uint64(2)
         if verbose
           print("DOWN string heap limit: {bytes_hr(strLimit)}\n")
@@ -229,12 +229,13 @@ def send_response(var data: JsonValue?; id: double)
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_response", data, id)
+    delete data
 
 [export]
 def _send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendRequestStr(server, method, write_json(params), new ContextFunctionRpcCall(fn, ctx))
+  jsonRpc->sendRequestStr(server, clone_string(method), write_json(params), new ContextFunctionRpcCall(fn, ctx))
 
 [export]
 def send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
@@ -242,6 +243,7 @@ def send_request(method: string; var params: JsonValue?; var fn: function<(var p
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, ctx)
+    delete params
 
 [export]
 def send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>)
@@ -249,12 +251,13 @@ def send_request(method: string; var params: JsonValue?; var fn: function<(var p
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, this_context())
+    delete params
 
 [export]
 def _send_notification(method: string; var params: JsonValue?)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendNotificationStr(server, method, write_json(params))
+  jsonRpc->sendNotificationStr(server, clone_string(method), write_json(params))
 
 [export]
 def send_notification(method: string; var params: JsonValue?)
@@ -262,12 +265,13 @@ def send_notification(method: string; var params: JsonValue?)
     return
   unsafe
     get_debug_agent_context() |> invoke_in_context("_send_notification", method, params)
+    delete params
 
 [export]
 def _send_error(error: string; code: double; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendError(server, error, code, id)
+  jsonRpc->sendError(server, clone_string(error), code, id)
 
 [export]
 def send_error(error: string; code: double; id: double)
