@@ -57,16 +57,15 @@ class JsonRpcMatch : Matcher
       if ch == '}' || ch == ']'
         if self->parseReq(str |> slice(start, idx + 1))
           start = idx + 1
-          end = idx
+          end = idx + 1
 
     if start < strLen - 1
       if self->parseReq(str |> slice(start, strLen))
-        end = strLen - 1
+        end = strLen
 
     if length(requests) == 0
       return <- [[MatchResult invalid = null]]
-    end += 1
-    return <- [[MatchResult success <- [[auto [{ string[] "" }], end]] ]]
+    return <- [[MatchResult success = end ]]
 
   def parseReq(str: string): bool
     var error: string
@@ -152,11 +151,11 @@ class JsonRpcHandler
       return addr(match)
 
   def listen(var server: WebServer?): void
-    server->on(self->matchPtr()) <| @(msg: string; args: array<string>)
+    server->on(self->matchPtr()) <| @(msg: string)
       return self->rpcHandler(msg)
 
   def listenUnhandled(var server: WebServer?): void
-    server->unhandled() <| @(msg: string; args: array<string>)
+    server->unhandled() <| @(msg: string)
       print("[E] {PARSE_ERROR}: `{msg}`\n")
       var res = self->getError("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
       let str = write_json(res)
@@ -164,7 +163,7 @@ class JsonRpcHandler
         delete res
       return str
 
-  [unused_argument(msg)] def rpcHandler(msg: string): string
+  def rpcHandler(msg: string): string
     var errors = ""
     for req in match.requests
       var found = false

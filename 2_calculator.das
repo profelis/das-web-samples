@@ -15,14 +15,16 @@ var counter = 0
 [export]
 def main (fn:string)
   var server = new WebServer()
-  server->on(new RegexMatch(%regex~\/inc/(.+)%%)) <| @(msg: string; args: array<string>)
-    counter += to_int(args[0])
+  var plusMatch = new RegexMatch(%regex~\/inc/(.+)%%)
+  server->on(plusMatch) <| @(msg: string)
+    counter += to_int(plusMatch.args[0])
     return "{counter}\n"
-  server->on(new RegexMatch(%regex~\/dec/(.+)$%%)) <| @(msg: string; args: array<string>)
-    counter -= to_int(args[0])
+  var minusMatch = new RegexMatch(%regex~\/dec/(.+)$%%)
+  server->on(minusMatch) <| @(msg: string)
+    counter -= to_int(minusMatch.args[0])
     return "{counter}\n"
-  server->onStr("/get") <| @(msg: string; args: array<string>)
+  server->onStr("/get") <| @(msg: string)
     return "{counter}\n"
-  server->unhandled() <| @(msg: string; args: array<string>)
+  server->unhandled() <| @(msg: string)
     return "{msg}: unhandled call. counter = {counter}\n"
   return run_debug_server(server, fn)
