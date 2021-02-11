@@ -45,7 +45,7 @@ class FunctionRpcNotification : RpcCall
   [unused_argument(id)] def override call(var params: JsonValue?; id:double): void
     invoke(fn, params)
 
-def get_arg(params: JsonValue?; idx: int): JsonValue?
+def get_arg(params: JsonValue?; idx: int = 0): JsonValue?
   if params == null
     return null
   if params is _array
