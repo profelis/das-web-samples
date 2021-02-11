@@ -11,6 +11,7 @@ require daslib/template_boost
 
 require server_agent public
 require jsonrpc_handler public
+require jsonrpc_args public
 
 // [init,export]
 // def register_<func_name>_<bind_name>()

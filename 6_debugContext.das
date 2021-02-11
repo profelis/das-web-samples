@@ -4,7 +4,6 @@ require fio
 require strings
 
 require jsonrpc_boost
-require jsonrpc_utils
 
 
 [export]
