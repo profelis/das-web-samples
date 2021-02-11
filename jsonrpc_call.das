@@ -143,3 +143,15 @@ def as_int(js: JsonValue?): int
     return to_int(js as _string)
 
   return 0
+
+def as_uint(js: JsonValue?): uint
+  if js == null
+    return 0u
+  if js is _number
+    return uint(js as _number)
+  if js is _bool
+    return js as _bool ? 1u : 0u
+  if js is _string
+    return uint(to_float(js as _string))
+
+  return 0u

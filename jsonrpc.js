@@ -9,9 +9,11 @@ function createSocket() {
   socket = new WebSocket("ws://localhost:1000")
   for (let fn of newSocketListeners)
     fn.call(null, socket)
+
+  var data = ""
   socket.onmessage = async event => {
-    let text = await event.data.text()
-    // split multiple json messages in one string
+    let text = data + await event.data.text()
+    // split multiple json messages
     let start = 0
     for (let i = 0; i < text.length; ++i) {
       if (text[i] == "}" || text[i] == "]") {
@@ -20,16 +22,11 @@ function createSocket() {
           JSON.parse(sub)
           jrpc.messageHandler(sub)
           start = i + 1
-        } catch (e) {
-          console.log("can't parse", text.substring(start, i + 1))
-         }
+        } catch (e) {}
       }
     }
     if (start < text.length - 1)
-    {
-      let sub = text.substring(start)
-      jrpc.messageHandler(sub)
-    }
+      data = text.substring(start)
   }
   jrpc.toStream = _msg => socket.send(_msg)
 
@@ -43,6 +40,8 @@ function createSocket() {
       console.error('Connection suddenly close')
     }
     console.info('socket close code : ' + event.code + ' reason: ' + event.reason)
+    if (data.length > 0)
+      console.log("unhandled request data", data)
     console.log(`reconnect... `)
     setTimeout(createSocket, 1000)
   }

@@ -70,8 +70,8 @@ class JsonRpcMatch : Matcher
   def parseReq(str: string): bool
     var res = false
     try
-    var error: string
-    var js = read_json(str, error)
+      var error: string
+      var js = read_json(str, error)
       res = self->parseReqJson(js, true)
     recover
       print("[E] unhandled error in JsonRpcMatch::parseReq:\n{str}\n")
