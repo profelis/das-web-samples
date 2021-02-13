@@ -28,17 +28,15 @@ def first_start()
 
 
 [rpc_call(name="reverse")]
-def reverse_handler(var params: JsonValue?; id: double)
-  let str = params |> get_arg(0) |> as_string()
+def reverse_handler(str: string; id: double)
   send_response(JV(reverse(str)), id)
 
 
 [rpc_notification(name="whatsup")]
-def whatsup_handler(var params: JsonValue?)
-  let arg0 = params |> get_arg(0)
-  print("whatsup!!! arg0: {arg0}\n")
+def whatsup_handler(var param: JsonValue?)
+  print("whatsup!!! arg0: {param}\n")
   send_notification("status", JV(42))
-  send_notification("serverTime", JV(ref_time_ticks()))
+  send_notification("serverTime", JV("{get_clock()}"))
   send_request("giveHelp", JV(null), @@help_handler)
 
 
