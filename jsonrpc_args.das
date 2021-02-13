@@ -147,14 +147,26 @@ def JV(val: uint64): JsonValue?
 def JV(val: float): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def JV(val1; val2)
+def JV(val1, val2: JsonValue?): JsonValue?
+  return JV([{auto[] val1; val2}])
+
+def JV(val1, val2, val3: JsonValue?): JsonValue?
+  return JV([{auto[] val1; val2; val3}])
+
+def JV(val1, val2, val3, val4: JsonValue?): JsonValue?
+  return JV([{auto[] val1; val2; val3; val4}])
+
+def JV(val1, val2, val3, val4, val5: JsonValue?): JsonValue?
+  return JV([{auto[] val1; val2; val3; val4; val5}])
+
+def JV(val1; val2): JsonValue?
   return JV([{auto[] JV(val1); JV(val2)}])
 
-def JV(val1; val2; val3)
+def JV(val1; val2; val3): JsonValue?
   return JV([{auto[] JV(val1); JV(val2); JV(val3)}])
 
-def JV(val1; val2; val3, val4)
+def JV(val1; val2; val3; val4): JsonValue?
   return JV([{auto[] JV(val1); JV(val2); JV(val3); JV(val4)}])
 
-def JV(val1; val2; val3, val4, val5)
+def JV(val1; val2; val3; val4; val5): JsonValue?
   return JV([{auto[] JV(val1); JV(val2); JV(val3); JV(val4); JV(val5)}])
