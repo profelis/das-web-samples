@@ -37,8 +37,8 @@ def whatsup_handler(var param: JsonValue?)
   print("whatsup!!! arg0: {param}\n")
   send_notification("status", JV(42))
   send_notification("serverTime", JV("{get_clock()}"))
-  send_request("giveHelp", JV(null), @@help_handler)
+  send_request("giveHelp", JV("test string"), @@help_handler)
 
-
-def help_handler(var params: JsonValue?; id: double)
-  print("giveHelp response {id} - {write_json(params)}. Thanks\n")
+[rpc_handler]
+def help_handler(str: string; id: double)
+  print("giveHelp response {id} - {str}. Thanks\n")

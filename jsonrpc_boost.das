@@ -78,48 +78,22 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   compiling_module() |> add_function(fn)
 
 
-def add_proxy_func(at; var func; fn_proxy_name; is_call)
-  var fn <- new [[Function() at = at, atDecl = at, name := fn_proxy_name]]
-  fn.flags |= FunctionFlags generated
-  fn.flags |= FunctionFlags exports
-  // fn.sideEffectFlags |= FunctionSideEffectFlags modifyExternal
-  fn.result <- new [[TypeDecl() baseType=Type tVoid, at=at]]
-  var jsonStruct := get_ast_struct("json", "JsonValue")
-  var jsonStructType <- new [[TypeDecl() at = at, baseType = Type tStructure, structType = get_ptr(jsonStruct) ]]
-  // jsonStructType.flags &= ~TypeDeclFlags constant
-  // jsonStructType.flags |= TypeDeclFlags removeConstant
-  var paramsArg <- new [[Variable()
-    at = at,
-    name := "params",
-    _type <- new [[TypeDecl() at = at, baseType = Type tPointer, firstType <- jsonStructType ]]
-  ]]
-  paramsArg._type.flags |= TypeDeclFlags removeConstant
-  // paramsArg.flags &= ~(FieldDeclarationFlags capturedConstant)
-  fn.arguments |> emplace(paramsArg)
-  if is_call
-    var idVal <- new [[Variable()
-      at = at,
-      name := "id",
-      _type <- new [[TypeDecl() at = at, baseType = Type tDouble ]]
-    ]]
-    idVal._type.flags |= TypeDeclFlags constant
-    fn.arguments |> emplace(idVal)
+def transform_args(var fn; is_call)
+  let at = fn.at
+  var blk: ExprBlock?
+  unsafe
+    blk = reinterpret<ExprBlock?> fn.body
 
-  // debug(func.arguments[0])
-
-  for arg in fn.arguments
-    arg.flags |= VariableFlags marked_used
-
-  var blk <- new [[ExprBlock() at = at]]
-
-  var callBase <- new [[ExprCall() at = at, name := func.name ]]
-  let argsNum = func.arguments.length
-  for i in range(argsNum - (is_call ? 1 : 0))
+  let paramsName = "__params__"
+  let argsNum = fn.arguments.length
+  let processArgsNum = argsNum - (is_call ? 1 : 0)
+  for i in range(processArgsNum)
     var argi <- new [[ExprCall() at = at, name := "get_arg" ]]
-    argi.arguments |> emplace_new(new [[ExprVar() at = at, name := "params"]])
+    argi.arguments |> emplace_new(new [[ExprVar() at = at, name := paramsName]])
     argi.arguments |> emplace_new(new [[ExprConstInt() at = at, value = i ]])
 
-    var baseArgType & = func.arguments[i]._type
+    var baseArg & = fn.arguments[i]
+    var baseArgType & = baseArg._type
     if baseArgType.baseType == Type tInt
       var toInt <- new [[ExprCall() at = at, name := "as_int" ]]
       toInt.arguments |> emplace(argi)
@@ -147,25 +121,35 @@ def add_proxy_func(at; var func; fn_proxy_name; is_call)
 
     var vlet <- new [[ExprLet() at = at, atInit = at ]]
     vlet.variables |> emplace_new() <| new [[Variable() at = at,
-            name := "arg_{i}",
-            _type <- new [[TypeDecl() baseType = Type autoinfer, at = at]],
+            name := baseArg.name,
+            _type <- baseArgType,
             init <- argi
         ]]
-    blk.list |> emplace(vlet)
-    callBase.arguments |> emplace_new(new [[ExprVar() at = at, name := "arg_{i}"]])
+    blk.list |> emplace(vlet, i)
 
     // var deb <- new [[ExprDebug() at = at, name := "debug"]]
     // var debVal <- new [[ExprVar() at = at, name := "arg_{i}"]]
     // deb.arguments |> emplace(debVal)
     // blk.list |> emplace(deb)
 
-  if is_call
-    callBase.arguments |> emplace_new(new [[ExprVar() at = at, name := func.arguments[argsNum - 1].name]])
+  for i in range(processArgsNum) // cleanup all arguments
+    fn.arguments |> erase(0)
 
-  blk.list |> emplace(callBase)
+  var jsonStruct := get_ast_struct("json", "JsonValue")
+  var jsonStructType <- new [[TypeDecl() at = at, baseType = Type tStructure, structType = get_ptr(jsonStruct) ]]
+  // jsonStructType.flags &= ~TypeDeclFlags constant
+  // jsonStructType.flags |= TypeDeclFlags removeConstant
+  var paramsArg <- new [[Variable()
+    at = at,
+    name := paramsName,
+    _type <- new [[TypeDecl() at = at, baseType = Type tPointer, firstType <- jsonStructType ]]
+  ]]
+  paramsArg._type.flags |= TypeDeclFlags removeConstant
+  // paramsArg.flags &= ~(FieldDeclarationFlags capturedConstant)
+  fn.arguments |> emplace(paramsArg, 0)
 
-  fn.body <- blk
-  compiling_module() |> add_function(fn)
+  for arg in fn.arguments
+    arg.flags |= VariableFlags marked_used
 
 
 def validate_name_annotation(name_arg; var errors: das_string): bool
@@ -208,25 +192,30 @@ class RpcNotificationRawAnnotation : AstFunctionAnnotation
     return true
 
 
+def validate_req_id_arg(arguments; var errors: das_string)
+  let argsNum = arguments.length
+  if argsNum < 1
+    errors := "at least one argument with request id is required (req_id: double)"
+    return false
+  if arguments[argsNum - 1]._type.baseType != Type tDouble
+    errors := "the last argument should be of double type (req_id: double)"
+    return false
+  return true
+
+
 [function_macro(name="rpc_call")]
 class RpcCallAnnotation : AstFunctionAnnotation
   [unused_argument(group)] def override apply(var func: FunctionPtr; var group: ModuleGroup; args: AnnotationArgumentList; var errors: das_string) : bool
     let nameArg = find_arg("name", args)
     if !validate_name_annotation(nameArg, errors)
       return false
-    let argsNum = func.arguments.length
-    if argsNum < 1
-      errors := "at least one argument with request id is required (id: double)"
-      return false
-    if func.arguments[argsNum - 1]._type.baseType != Type tDouble
-      errors := "the last argument should be of double type (id: double)"
+    if !validate_req_id_arg(func.arguments, errors)
       return false
 
     keep_func_and_args(func)
 
-    let proxyName = "proxy_{func.name}"
-    add_proxy_func(func.at, func, proxyName, /*is_call*/true)
-    add_call_reg_func(func.at, proxyName, nameArg as tString)
+    transform_args(func, /*is_call*/true)
+    add_call_reg_func(func.at, func.name, nameArg as tString)
     return true
 
 
@@ -238,7 +227,17 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
       return false
 
     keep_func_and_args(func)
-    let proxyName = "proxy_{func.name}"
-    add_proxy_func(func.at, func, proxyName, /*is_call*/false)
-    add_notification_reg_func(func.at, proxyName, nameArg as tString)
+    transform_args(func, /*is_call*/false)
+    add_notification_reg_func(func.at, func.name, nameArg as tString)
+    return true
+
+
+[function_macro(name="rpc_handler")]
+class RpcHandlerAnnotation : AstFunctionAnnotation
+  [unused_argument(group,args)] def override apply(var func: FunctionPtr; var group: ModuleGroup; args: AnnotationArgumentList; var errors: das_string): bool
+    if !validate_req_id_arg(func.arguments, errors)
+      return false
+
+    keep_func_and_args(func)
+    transform_args(func, /*is_call*/true)
     return true
