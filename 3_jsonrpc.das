@@ -4,6 +4,7 @@ require daslib/json
 
 require debug_server
 require jsonrpc_handler
+require jsonrpc_args
 
 
 [export]

@@ -2,6 +2,7 @@ options indenting = 2
 options remove_unused_symbols = false
 module server_agent shared
 
+require strings
 require debugapi
 
 require jsonrpc_rtti
@@ -268,17 +269,17 @@ def send_notification(method: string; var params: JsonValue?)
     delete params
 
 [export]
-def _send_error(error: string; code: double; id: double)
+def _send_error(error: string; code: double; data: string; id: double)
   if !verify_in_debug_server()
     return
-  jsonRpc->sendError(server, clone_string(error), code, id)
+  jsonRpc->sendError(server, clone_string(error), code, empty(data) ? null : JV(data), id)
 
 [export]
-def send_error(error: string; code: double; id: double)
+def send_error(error: string; code: double; data: string = ""; id: double = 0lf)
   if !verify_not_in_debug()
     return
   unsafe
-    get_debug_agent_context() |> invoke_in_context("_send_error", error, code, id)
+    get_debug_agent_context() |> invoke_in_context("_send_error", error, code, data, id)
 
 
 def has_debug_agent(): bool

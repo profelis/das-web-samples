@@ -162,7 +162,7 @@ class JsonRpcHandler
   def listenUnhandled(var server: WebServer?): void
     server->unhandled() <| @(msg: string)
       print("[E] {PARSE_ERROR}: `{msg}`\n")
-      var res = self->getError("{PARSE_ERROR}: `{msg}`", PARSE_ERROR_CODE, 0lf)
+      var res = self->getError(PARSE_ERROR, PARSE_ERROR_CODE, JV(msg), 0lf)
       let str = write_json(res)
       unsafe
         delete res
@@ -182,7 +182,7 @@ class JsonRpcHandler
             found = true
             (**ptr)->call(req.params, req.id)
         if !found
-          var err = self->getError("{METHOD_NOT_FOUND}: `{req.reqType as method}` id: {req.id}", METHOD_NOT_FOUND_CODE, req.id)
+          var err = self->getError(METHOD_NOT_FOUND, METHOD_NOT_FOUND_CODE, JV(req.reqType as method), req.id)
           errors = length(errors) > 0 ? "{errors}\n{write_json(err)}" : write_json(err)
           unsafe
             delete err
@@ -261,14 +261,16 @@ class JsonRpcHandler
     unsafe
       delete res
 
-  def getError(error: string; code: double; id: double): JsonValue?
+  def getError(error: string; code: double; data: JsonValue? = null; id: double = 0lf): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
     if id != 0lf
       (res.value as _object)["id"] = JV(id)
+    if data != null
+      (res.value as _object)["data"] = data
     return res
 
-  def sendError(var server: WebServer?; error: string; code: double; id: double)
-    var res = self->getError(error, code, id)
+  def sendError(var server: WebServer?; error: string; code: double; data:JsonValue? = null; id: double = 0lf)
+    var res = self->getError(error, code, data, id)
     server->sendStr(write_json(res))
     unsafe
       delete res
