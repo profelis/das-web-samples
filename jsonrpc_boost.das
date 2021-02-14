@@ -45,7 +45,7 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
-  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name]]
+  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType <- typeinfo(ast_typedecl type<function<(var params: JsonValue?; id: double): void>>)]]
   apply_template(rules, at, qblock)
   delete rules
   unsafe
@@ -69,7 +69,7 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
-  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name]]
+  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType <- typeinfo(ast_typedecl type<function<(var params: JsonValue?): void>>)]]
   apply_template(rules, at, qblock)
   delete rules
   unsafe
@@ -78,7 +78,11 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   compiling_module() |> add_function(fn)
 
 
-def transform_args(var fn; is_call)
+def transform_args(var func; is_call; var errors: das_string): bool
+  var fn <- clone_function(func)
+  fn.annotations |> clear()
+  fn.name := "_{fn.name}"
+  fn.flags |= FunctionFlags generated
   let at = fn.at
   var blk: ExprBlock?
   unsafe
@@ -95,34 +99,40 @@ def transform_args(var fn; is_call)
     var baseArg & = fn.arguments[i]
     var baseArgType & = baseArg._type
     if baseArgType.baseType == Type tInt
-      var toInt <- new [[ExprCall() at = at, name := "as_int" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_int" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
     elif baseArgType.baseType == Type tUInt
-      var toInt <- new [[ExprCall() at = at, name := "as_uint" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_uint" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
     elif baseArgType.baseType == Type tFloat
-      var toInt <- new [[ExprCall() at = at, name := "as_float" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_float" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
     elif baseArgType.baseType == Type tDouble
-      var toInt <- new [[ExprCall() at = at, name := "as_double" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_double" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
     elif baseArgType.baseType == Type tBool
-      var toInt <- new [[ExprCall() at = at, name := "as_bool" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_bool" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
     elif baseArgType.baseType == Type tString
-      var toInt <- new [[ExprCall() at = at, name := "as_string" ]]
-      toInt.arguments |> emplace(argi)
-      argi <- toInt
+      var toValue <- new [[ExprCall() at = at, name := "as_string" ]]
+      toValue.arguments |> emplace(argi)
+      argi <- toValue
+    elif (baseArgType.baseType == Type tPointer && baseArgType.firstType != null && baseArgType.firstType.baseType == Type tStructure
+          && string(baseArgType.firstType.structType.name) == "JsonValue" && string(baseArgType.firstType.structType._module.name) == "json")
+      pass // JsonValue
+    else
+      errors := "{baseArg.name}: {describe(baseArgType)} - unsupported argument type"
+      return false
 
     var vlet <- new [[ExprLet() at = at, atInit = at ]]
     vlet.variables |> emplace_new() <| new [[Variable() at = at,
             name := baseArg.name,
-            _type <- baseArgType,
+            _type := baseArgType,
             init <- argi
         ]]
     blk.list |> emplace(vlet, i)
@@ -135,21 +145,19 @@ def transform_args(var fn; is_call)
   for i in range(processArgsNum) // cleanup all arguments
     fn.arguments |> erase(0)
 
-  var jsonStruct := get_ast_struct("json", "JsonValue")
-  var jsonStructType <- new [[TypeDecl() at = at, baseType = Type tStructure, structType = get_ptr(jsonStruct) ]]
-  // jsonStructType.flags &= ~TypeDeclFlags constant
-  // jsonStructType.flags |= TypeDeclFlags removeConstant
   var paramsArg <- new [[Variable()
     at = at,
     name := paramsName,
-    _type <- new [[TypeDecl() at = at, baseType = Type tPointer, firstType <- jsonStructType ]]
+    _type <- typeinfo(ast_typedecl type<json::JsonValue?>)
   ]]
   paramsArg._type.flags |= TypeDeclFlags removeConstant
-  // paramsArg.flags &= ~(FieldDeclarationFlags capturedConstant)
   fn.arguments |> emplace(paramsArg, 0)
 
   for arg in fn.arguments
     arg.flags |= VariableFlags marked_used
+
+  compiling_module() |> add_function(fn)
+  return true
 
 
 def validate_name_annotation(name_arg; var errors: das_string): bool
@@ -211,11 +219,10 @@ class RpcCallAnnotation : AstFunctionAnnotation
       return false
     if !validate_req_id_arg(func.arguments, errors)
       return false
-
+    if !transform_args(func, /*is_call*/true, errors)
+      return false
     keep_func_and_args(func)
-
-    transform_args(func, /*is_call*/true)
-    add_call_reg_func(func.at, func.name, nameArg as tString)
+    add_call_reg_func(func.at, "_{func.name}", nameArg as tString)
     return true
 
 
@@ -225,10 +232,10 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
     let nameArg = find_arg("name", args)
     if !validate_name_annotation(nameArg, errors)
       return false
-
+    if !transform_args(func, /*is_call*/false, errors)
+      return false
     keep_func_and_args(func)
-    transform_args(func, /*is_call*/false)
-    add_notification_reg_func(func.at, func.name, nameArg as tString)
+    add_notification_reg_func(func.at, "_{func.name}", nameArg as tString)
     return true
 
 
@@ -237,7 +244,7 @@ class RpcHandlerAnnotation : AstFunctionAnnotation
   [unused_argument(group,args)] def override apply(var func: FunctionPtr; var group: ModuleGroup; args: AnnotationArgumentList; var errors: das_string): bool
     if !validate_req_id_arg(func.arguments, errors)
       return false
-
+    if !transform_args(func, /*is_call*/true, errors)
+      return false
     keep_func_and_args(func)
-    transform_args(func, /*is_call*/true)
     return true
