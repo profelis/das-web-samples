@@ -20,13 +20,11 @@ require jsonrpc_args public
 //     if debugAgent != null && debugAgent != addr(this_context())
 //       add_call(<bind_name>, @@<func_name>)
 
-def get_ast_struct(mod_name: string; type_name: string)
-  var mod = get_module(mod_name)
-  var res: smart_ptr<Structure>
-  mod |> for_each_structure() <| $(s)
-    if res == null && string(s.name) == type_name
-      res := s
-  return res
+
+def keep_func_and_args(var func)
+  func.flags |= FunctionFlags exports
+  for arg in func.arguments
+    arg.flags |= VariableFlags marked_used
 
 
 def add_call_reg_func(at; call_fn_name; call_fn_alias)
@@ -152,9 +150,7 @@ def transform_args(var func; is_call; var errors: das_string): bool
   ]]
   fn.arguments |> emplace(paramsArg, 0)
 
-  for arg in fn.arguments
-    arg.flags |= VariableFlags marked_used
-
+  keep_func_and_args(fn)
   compiling_module() |> add_function(fn)
   return true
 
@@ -167,12 +163,6 @@ def validate_name_annotation(name_arg; var errors: das_string): bool
     errors := "name should be string value"
     return false
   return true
-
-
-def keep_func_and_args(var func)
-  func.flags |= FunctionFlags exports
-  for arg in func.arguments
-    arg.flags |= VariableFlags marked_used
 
 
 [function_macro(name="rpc_call_raw")]
