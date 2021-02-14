@@ -16,6 +16,7 @@ def get_arg(params: JsonValue?; idx: int = 0): JsonValue?
     return idx <= length(arr) ? arr[idx] : null
   return idx == 0 && !(params is _object) ? params : null
 
+
 def get_arg_name(params: JsonValue?; name: string): JsonValue?
   if params == null
     return null
@@ -26,6 +27,24 @@ def get_arg_name(params: JsonValue?; name: string): JsonValue?
       res = *sub
     return res
   return null
+
+
+def get_args_count(params: JsonValue?): int
+  if params == null
+    return 1 // one null value
+  if params is _array
+    return length(params as _array)
+  if params is _object
+    return length(params as _object)
+  return 1
+
+
+def length(js: JsonValue?)
+  if js is _array
+    return length(js as _array)
+  if js is _object
+    return length(js as _object)
+  return 0
 
 
 def is_null(js: JsonValue?): bool
