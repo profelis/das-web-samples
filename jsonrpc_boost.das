@@ -148,9 +148,8 @@ def transform_args(var func; is_call; var errors: das_string): bool
   var paramsArg <- new [[Variable()
     at = at,
     name := paramsName,
-    _type <- typeinfo(ast_typedecl type<json::JsonValue?>)
+    _type <- typeinfo(ast_typedecl type<json::JsonValue? -const>)
   ]]
-  paramsArg._type.flags |= TypeDeclFlags removeConstant
   fn.arguments |> emplace(paramsArg, 0)
 
   for arg in fn.arguments
