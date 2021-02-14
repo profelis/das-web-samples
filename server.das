@@ -41,7 +41,7 @@ class WebServer : Server
   def onStr(str: string; var handler: Handler)
     self->on(new StringMatch(str), handler)
 
-  def on(var match: Matcher? implicit; var handler: Handler)
+  def on(var match: Matcher?; var handler: Handler)
     matchers |> push(match)
     handlers |> emplace(handler)
 

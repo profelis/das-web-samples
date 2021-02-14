@@ -207,16 +207,16 @@ class JsonRpcHandler
     match->clean()
     return errors
 
-  def addCall(name: string; var call: RpcCall? implicit)
+  def addCall(name: string; var call: RpcCall?)
     calls[name] <- call
 
-  def addNotification(name: string; var notification: RpcCall? implicit)
+  def addNotification(name: string; var notification: RpcCall?)
     notifications[name] <- notification
 
-  def addResponseHander(id: double; var handler: RpcCall? implicit)
+  def addResponseHander(id: double; var handler: RpcCall?)
     handlers[id] <- handler
 
-  def addErrorHandler(var handler: RpcCall? implicit)
+  def addErrorHandler(var handler: RpcCall?)
     errorHandlers |> emplace(handler)
 
   def sendResponseStr(var server: WebServer?; msg: string; id: double)
@@ -239,13 +239,13 @@ class JsonRpcHandler
     var res = "\{\"jsonrpc\": \"2.0\", \"method\": \"{method}\", \"params\": {params}, \"id\": {int(id)}\}"
     server->sendStr(res)
 
-  def sendRequestStr(var server: WebServer?; method: string; params: string; var handler: RpcCall? implicit): double
+  def sendRequestStr(var server: WebServer?; method: string; params: string; var handler: RpcCall?): double
     currentId += 1lf
     self->addResponseHander(currentId, handler)
     self->sendRequestRawStr(server, method, params, currentId)
     return currentId
 
-  def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall? implicit): double
+  def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall?): double
     currentId += 1lf
     self->addResponseHander(currentId, handler)
     self->sendRequestRaw(server, method, params, currentId)
