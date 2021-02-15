@@ -38,7 +38,7 @@ def whatsup_handler(var param: string)
   print("whatsup!!! arg0: {param}\n")
   send_notification("status", JV(42))
   send_notification("serverTime", JV("{get_clock()}"))
-  send_request("giveHelp", JV("test string"), @@_help_handler)
+  send_request("giveHelp", JV("test string"), @@help_handler)
 
 
 [rpc_handler]

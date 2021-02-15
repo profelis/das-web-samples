@@ -79,7 +79,7 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
 def transform_args(var func; is_call; var errors: das_string): bool
   var fn <- clone_function(func)
   fn.annotations |> clear()
-  fn.name := "_{fn.name}"
+  fn.name := "{genFnPrefix}{fn.name}"
   fn.flags |= FunctionFlags generated
   let at = fn.at
   var blk: ExprBlock?
@@ -206,7 +206,7 @@ class RpcCallAnnotation : AstFunctionAnnotation
     if !transform_args(func, /*is_call*/true, errors)
       return false
     keep_func_and_args(func)
-    add_call_reg_func(func.at, "_{func.name}", nameArg as tString)
+    add_call_reg_func(func.at, "{genFnPrefix}{func.name}", nameArg as tString)
     return true
 
 
@@ -219,7 +219,7 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
     if !transform_args(func, /*is_call*/false, errors)
       return false
     keep_func_and_args(func)
-    add_notification_reg_func(func.at, "_{func.name}", nameArg as tString)
+    add_notification_reg_func(func.at, "{genFnPrefix}{func.name}", nameArg as tString)
     return true
 
 
