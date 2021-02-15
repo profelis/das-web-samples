@@ -43,7 +43,7 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
-  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType <- typeinfo(ast_typedecl type<function<(var params: JsonValue?; id: double): void>>)]]
+  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType := typeinfo(ast_typedecl type<function<(var params: JsonValue?; id: double): void>>)]]
   apply_template(rules, at, qblock)
   delete rules
   unsafe
@@ -67,7 +67,7 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
-  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType <- typeinfo(ast_typedecl type<function<(var params: JsonValue?): void>>)]]
+  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType := typeinfo(ast_typedecl type<function<(var params: JsonValue?): void>>)]]
   apply_template(rules, at, qblock)
   delete rules
   unsafe
@@ -135,18 +135,13 @@ def transform_args(var func; is_call; var errors: das_string): bool
         ]]
     blk.list |> emplace(vlet, i)
 
-    // var deb <- new [[ExprDebug() at = at, name := "debug"]]
-    // var debVal <- new [[ExprVar() at = at, name := "arg_{i}"]]
-    // deb.arguments |> emplace(debVal)
-    // blk.list |> emplace(deb)
-
   for i in range(processArgsNum) // cleanup all arguments
     fn.arguments |> erase(0)
 
   var paramsArg <- new [[Variable()
     at = at,
     name := paramsName,
-    _type <- typeinfo(ast_typedecl type<json::JsonValue? -const>)
+    _type := typeinfo(ast_typedecl type<json::JsonValue? -const>)
   ]]
   fn.arguments |> emplace(paramsArg, 0)
 
