@@ -34,7 +34,7 @@ def reverse_handler(str: string; id: double)
 
 
 [rpc_notification(name="whatsup")]
-def whatsup_handler(var param: string)
+def whatsup_handler(param: string)
   print("whatsup!!! arg0: {param}\n")
   send_notification("status", JV(42))
   send_notification("serverTime", JV("{get_clock()}"))
@@ -45,4 +45,3 @@ def whatsup_handler(var param: string)
 def help_handler(str: string; id: double)
   print("giveHelp response {id} - {str}. Thanks\n")
   // send_notification("serverTime23", JV(ref_time_ticks()))
-

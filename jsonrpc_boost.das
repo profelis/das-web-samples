@@ -1,4 +1,3 @@
-
 options indenting = 2
 options remove_unused_symbols = false
 module jsonrpc_boost shared
@@ -12,6 +11,8 @@ require daslib/template_boost
 require server_agent public
 require jsonrpc_handler public
 require jsonrpc_args public
+require server_agent_boost public
+
 
 // [init,export]
 // def register_<func_name>_<bind_name>()

@@ -2,7 +2,6 @@ options indenting = 2
 options remove_unused_symbols = false
 module server_agent shared
 
-require ast
 require strings
 require debugapi
 
@@ -12,9 +11,8 @@ require jsonrpc_rtti
 require jsonrpc_handler
 require server
 
-let
-  genFnPrefix = "`gen`"
-  initialStrLimit = uint64(2 * 1024 * 1024)
+
+let initialStrLimit = uint64(2 * 1024 * 1024)
 
 var
   serverDebugLogs = false
@@ -242,22 +240,6 @@ def _send_request(method: string; var params: JsonValue?; var fn: function<(var 
     return
   jsonRpc->sendRequestStr(server, clone_string(method), write_json(params), new ContextFunctionRpcCall(fn, ctx))
 
-[export,tag_function(send_request_fn)]
-def send_request(method: string; var params: JsonValue?; var fn: function; var ctx: Context)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, ctx)
-    delete params
-
-[export,tag_function(send_request_fn)]
-def send_request(method: string; var params: JsonValue?; var fn: function)
-  if !verify_not_in_debug()
-    return
-  unsafe
-    get_debug_agent_context() |> invoke_in_context("_send_request", method, params, fn, this_context())
-    delete params
-
 [export]
 def send_request_typed(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: double): void>; var ctx: Context)
   if !verify_not_in_debug()
@@ -325,30 +307,3 @@ def start_agent(force:bool = false): bool
 [export]
 def tick_agent()
   tick_debug_agent()
-
-
-[tag_function_macro(tag="send_request_fn")]
-class SendRequestFn : AstFunctionAnnotation
-  [unused_argument(errors)] def override transform(var expr: smart_ptr<ExprCallFunc>; var errors: das_string): ExpressionPtr
-    var exprClone <- clone_expression(expr)
-    var newCall : smart_ptr<ExprCallFunc>
-    unsafe
-      newCall <- reinterpret<smart_ptr<ExprCallFunc>> exprClone
-    newCall.name := "{newCall.name}_typed"
-    var success = false
-    for arg in newCall.arguments
-      if arg is ExprAddr
-        unsafe
-          var exprAddr = reinterpret<ExprAddr?> arg
-          if !string(exprAddr.target) |> starts_with(genFnPrefix)
-            let newName = "{genFnPrefix}{exprAddr.target}"
-            var fn <- compiling_module() |> find_unique_function(newName)
-            if fn == null
-              compiling_program() |> macro_error(newCall.at, "can't find <{newName}> function, annotate function\n[rpc_handler]\ndef {exprAddr.target}...")
-              return [[ExpressionPtr]]
-            else
-              exprAddr.target := newName
-              success = true
-    if success
-      return newCall
-    return [[ExpressionPtr]]
