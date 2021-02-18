@@ -21,11 +21,13 @@ require server_agent_boost public
 //     if debugAgent != null && debugAgent != addr(this_context())
 //       add_call(<bind_name>, @@<func_name>)
 
+def keep_args(var func)
+  for arg in func.arguments
+    arg.flags |= VariableFlags marked_used
 
 def keep_func_and_args(var func)
   func.flags |= FunctionFlags exports
-  for arg in func.arguments
-    arg.flags |= VariableFlags marked_used
+  keep_args(func)
 
 
 def add_call_reg_func(at; call_fn_name; call_fn_alias)
@@ -206,7 +208,7 @@ class RpcCallAnnotation : AstFunctionAnnotation
       return false
     if !transform_args(func, /*is_call*/true, errors)
       return false
-    keep_func_and_args(func)
+    keep_args(func)
     add_call_reg_func(func.at, "{genFnPrefix}{func.name}", nameArg as tString)
     return true
 
@@ -219,7 +221,7 @@ class RpcNotificationAnnotation : AstFunctionAnnotation
       return false
     if !transform_args(func, /*is_call*/false, errors)
       return false
-    keep_func_and_args(func)
+    keep_args(func)
     add_notification_reg_func(func.at, "{genFnPrefix}{func.name}", nameArg as tString)
     return true
 
@@ -231,5 +233,5 @@ class RpcHandlerAnnotation : AstFunctionAnnotation
       return false
     if !transform_args(func, /*is_call*/true, errors)
       return false
-    keep_func_and_args(func)
+    keep_args(func)
     return true
