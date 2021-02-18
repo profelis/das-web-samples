@@ -16,7 +16,7 @@ def main (fn:string)
     jsonRpc->sendNotification(server, "setTitle", JV([{ auto[] JV("hello from das") }]))
   jsonRpc->addNotification("reqUpdateTitle", new LambdaRpcNotification(reqUpdateTitle))
 
-  var sumHandler <- @ <| (var params: JsonValue?; id: double)
+  var sumHandler <- @ <| (var params: JsonValue?; id: uint64)
     let arg1 = params |> get_arg(0)
     let arg2 = params |> get_arg(1)
     let sum = arg1 |> as_double() + arg2 |> as_double()

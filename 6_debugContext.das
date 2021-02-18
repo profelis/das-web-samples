@@ -28,7 +28,7 @@ def first_start()
 
 
 [rpc_call(name="reverse")]
-def reverse_handler(str: string; id: double)
+def reverse_handler(str: string; id: uint64)
   print("{str}\n")
   send_response(JV(reverse(str)), id)
 
@@ -42,6 +42,6 @@ def whatsup_handler(param: string)
 
 
 [rpc_handler]
-def help_handler(str: string; id: double)
+def help_handler(str: string; id: uint64)
   print("giveHelp response {id} - {str}. Thanks\n")
   // send_notification("serverTime23", JV(ref_time_ticks()))

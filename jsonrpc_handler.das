@@ -31,7 +31,7 @@ variant JsonRpcReqType
 
 struct JsonRpcReq
   js: JsonValue?
-  id: double = 0lf
+  id: uint64 = 0ul
   reqType: JsonRpcReqType
   params: JsonValue?
 
@@ -119,9 +119,9 @@ class JsonRpcMatch : Matcher
       if req.reqType is method || req.reqType is result
         (js as _object) |> find_if_exists("id") <| $(ptr)
           if *ptr.value is _number
-            req.id = *ptr.value as _number
+            req.id = uint64(*ptr.value as _number)
           elif *ptr.value is _string
-            req.id = double(to_int(*ptr.value as _string))
+            req.id = uint64(double(*ptr.value as _string))
           else
             failed = true
         if failed // invalid id
@@ -143,12 +143,12 @@ class JsonRpcMatch : Matcher
 
 
 class JsonRpcHandler
-  currentId: double = 0lf
+  currentId: uint64 = 0ul
 
   match: JsonRpcMatch <- JsonRpcMatch()
   calls: table<string; RpcCall?>
   notifications: table<string; RpcCall?>
-  handlers: table<double; RpcCall?>
+  handlers: table<uint64; RpcCall?>
   errorHandlers: array<RpcCall?>
 
   [private] def matchPtr()
@@ -162,7 +162,7 @@ class JsonRpcHandler
   def listenUnhandled(var server: WebServer?): void
     server->unhandled() <| @(msg: string)
       print("[E] {PARSE_ERROR}: `{msg}`\n")
-      var res = self->getError(PARSE_ERROR, PARSE_ERROR_CODE, JV(msg), 0lf)
+      var res = self->getError(PARSE_ERROR, PARSE_ERROR_CODE, JV(msg), 0ul)
       let str = write_json(res)
       unsafe
         delete res
@@ -173,10 +173,10 @@ class JsonRpcHandler
     for req in match.requests
       var found = false
       if req.reqType is method
-        if req.id == 0lf
+        if req.id == 0ul
           notifications |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
             found = true
-            (**ptr)->call(req.params, 0lf)
+            (**ptr)->call(req.params, 0ul)
         else
           calls |> find_for_edit_if_exists(req.reqType as method) <| $(ptr)
             found = true
@@ -192,14 +192,14 @@ class JsonRpcHandler
       if req.reqType is result
         handlers |> find_for_edit_if_exists(req.id) <| $(handler)
           found = true
-          (**handler)->call(req.params, 0lf)
+          (**handler)->call(req.params, 0ul)
         if !found
           print("[E] unhandled result id: {req.id} - {msg}\n")
         continue
 
       if req.reqType is error
         for handler in errorHandlers
-          (*handler)->call(req.params, 0lf)
+          (*handler)->call(req.params, 0ul)
 
         print("[E] response error id: {req.id} - {msg}\n{write_json(req.params)}\n")
         continue
@@ -213,40 +213,40 @@ class JsonRpcHandler
   def addNotification(name: string; var notification: RpcCall?)
     notifications[name] <- notification
 
-  def addResponseHander(id: double; var handler: RpcCall?)
+  def addResponseHander(id: uint64; var handler: RpcCall?)
     handlers[id] <- handler
 
   def addErrorHandler(var handler: RpcCall?)
     errorHandlers |> emplace(handler)
 
-  def sendResponseStr(var server: WebServer?; msg: string; id: double)
+  def sendResponseStr(var server: WebServer?; msg: string; id: uint64)
     var res = "\{\"jsonrpc\": \"2.0\", \"result\": {msg}, \"id\": {int(id)}\}"
     server->sendStr(res)
 
-  def sendResponse(var server: WebServer?; msg: JsonValue?; id: double)
-    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "result" => msg }})
+  def sendResponse(var server: WebServer?; msg: JsonValue?; id: uint64)
+    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(double(id)); "result" => msg }})
     server->sendStr(write_json(res))
     unsafe
       delete res
 
-  def sendRequestRaw(var server: WebServer?; method: string; params: JsonValue?; id: double): void
-    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(id); "method" => JV(method); "params" => params }})
+  def sendRequestRaw(var server: WebServer?; method: string; params: JsonValue?; id: uint64): void
+    var res = JV({{ "jsonrpc" => JV("2.0"); "id" => JV(double(id)); "method" => JV(method); "params" => params }})
     server->sendStr(write_json(res))
     unsafe
       delete res
 
-  def sendRequestRawStr(var server: WebServer?; method: string; params: string; id: double): void
+  def sendRequestRawStr(var server: WebServer?; method: string; params: string; id: uint64): void
     var res = "\{\"jsonrpc\": \"2.0\", \"method\": \"{method}\", \"params\": {params}, \"id\": {int(id)}\}"
     server->sendStr(res)
 
-  def sendRequestStr(var server: WebServer?; method: string; params: string; var handler: RpcCall?): double
-    currentId += 1lf
+  def sendRequestStr(var server: WebServer?; method: string; params: string; var handler: RpcCall?): uint64
+    currentId += 1ul
     self->addResponseHander(currentId, handler)
     self->sendRequestRawStr(server, method, params, currentId)
     return currentId
 
-  def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall?): double
-    currentId += 1lf
+  def sendRequest(var server: WebServer?; method: string; params: JsonValue?; var handler: RpcCall?): uint64
+    currentId += 1ul
     self->addResponseHander(currentId, handler)
     self->sendRequestRaw(server, method, params, currentId)
     return currentId
@@ -261,15 +261,15 @@ class JsonRpcHandler
     unsafe
       delete res
 
-  def getError(error: string; code: double; data: JsonValue? = null; id: double = 0lf): JsonValue?
+  def getError(error: string; code: double; data: JsonValue? = null; id: uint64 = 0ul): JsonValue?
     var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
-    if id != 0lf
-      (res.value as _object)["id"] = JV(id)
+    if id != 0ul
+      (res.value as _object)["id"] = JV(double(id))
     if data != null
       (res.value as _object)["data"] = data
     return res
 
-  def sendError(var server: WebServer?; error: string; code: double; data:JsonValue? = null; id: double = 0lf)
+  def sendError(var server: WebServer?; error: string; code: double; data:JsonValue? = null; id: uint64 = 0ul)
     var res = self->getError(error, code, data, id)
     server->sendStr(write_json(res))
     unsafe

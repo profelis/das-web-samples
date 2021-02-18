@@ -13,7 +13,7 @@ def main (fn:string)
 
   var jsonRpc = new JsonRpcHandler()
 
-  var reverseHandler <- @ <| (var params: JsonValue?; id: double)
+  var reverseHandler <- @ <| (var params: JsonValue?; id: uint64)
     let str = params |> get_arg(0) |> as_string()
     jsonRpc->sendResponse(server, JV(reverse(str)), id)
 

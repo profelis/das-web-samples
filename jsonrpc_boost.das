@@ -44,7 +44,7 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
-  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType := typeinfo(ast_typedecl type<function<(var params: JsonValue?; id: double): void>>)]]
+  rules |> replaceVariable("func") <| new [[ExprAddr() at = at, target := call_fn_name, funcType := typeinfo(ast_typedecl type<function<(var params: JsonValue?; id: uint64): void>>)]]
   apply_template(rules, at, qblock)
   delete rules
   unsafe
@@ -188,10 +188,10 @@ class RpcNotificationRawAnnotation : AstFunctionAnnotation
 def validate_req_id_arg(arguments; var errors: das_string)
   let argsNum = arguments.length
   if argsNum < 1
-    errors := "at least one argument with request id is required (req_id: double)"
+    errors := "at least one argument with request id is required (req_id: uint64)"
     return false
-  if arguments[argsNum - 1]._type.baseType != Type tDouble
-    errors := "the last argument should be of double type (req_id: double)"
+  if arguments[argsNum - 1]._type.baseType != Type tUInt64
+    errors := "the last argument should be of uint64 type (req_id: uint64)"
     return false
   return true
 
