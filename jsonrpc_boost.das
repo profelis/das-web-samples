@@ -14,13 +14,6 @@ require jsonrpc_args public
 require server_agent_boost public
 
 
-// [init,export]
-// def register_<func_name>_<bind_name>()
-//   unsafe
-//     let debugAgent = addr(get_debug_agent_context())
-//     if debugAgent != null && debugAgent != addr(this_context())
-//       add_call(<bind_name>, @@<func_name>)
-
 def keep_args(var func)
   for arg in func.arguments
     arg.flags |= VariableFlags marked_used
