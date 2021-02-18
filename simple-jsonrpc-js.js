@@ -362,10 +362,9 @@
             var message = {
                 "jsonrpc": "2.0",
                 "method": method,
-                "params": params
             };
 
-            if (isObject(params) && !isEmpty(params)) {
+            if (!isUndefined(params)) {
                 message.params = params;
             }
 
@@ -380,7 +379,7 @@
                 "id": id
             };
 
-            if (isObject(params) && !isEmpty(params)) {
+            if (!isUndefined(params)) {
                 message.params = params;
             }
 

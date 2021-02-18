@@ -5,14 +5,18 @@ var socket
 
 var newSocketListeners = []
 
-function createSocket() {
+function createSocket(reconnect) {
   socket = new WebSocket("ws://localhost:1000")
   for (let fn of newSocketListeners)
     fn.call(null, socket)
 
   var data = ""
   socket.onmessage = async event => {
-    let text = data + await event.data.text()
+    let text = data
+    if (typeof (event.data) == "string")
+      text += event.data
+    else
+      text += await event.data.text()
     // split multiple json messages
     let start = 0
     for (let i = 0; i < text.length; ++i) {
@@ -22,7 +26,7 @@ function createSocket() {
           JSON.parse(sub)
           jrpc.messageHandler(sub)
           start = i + 1
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     if (start < text.length - 1)
@@ -42,7 +46,9 @@ function createSocket() {
     console.info('socket close code : ' + event.code + ' reason: ' + event.reason)
     if (data.length > 0)
       console.log("unhandled request data", data)
-    console.log(`reconnect... `)
-    setTimeout(createSocket, 1000)
+    if (reconnect) {
+      console.log(`reconnect... `)
+      setTimeout(createSocket, 1000)
+    }
   }
 }
