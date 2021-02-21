@@ -1,4 +1,6 @@
 options indenting = 2
+options remove_unused_symbols = false
+options no_unused_function_arguments = false
 module server_agent_boost shared
 
 require ast
