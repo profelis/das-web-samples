@@ -54,25 +54,20 @@ def j(val: float): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
 
-def js(value: array<auto>): JsonValue?
-  var arr: array<JsonValue?>
-  for x in value
-    arr |> push <| js(x)
-  return j(arr)
-
-
-def js(value: auto[]): JsonValue?
-  var arr: array<JsonValue?>
-  for x in value
-    arr |> push <| js(x)
-  return j(arr)
-
-
 def js(value): JsonValue?
-  static_if typeinfo(is_struct value)
+  static_if typeinfo(is_pointer value)
+    if value == null
+      return null
+    else
+      return js(*value)
+  elif typeinfo(is_struct value)
+    verify(!typeinfo(is_class value))
     var map: table<string; JsonValue?>
-    apply(value) <| $(name:string; field)
-      static_if typeinfo(is_pointer field)
+    apply(value) <| $(name: string; field)
+      // static_if typeinfo(is_function field)
+      //   pass // skip functions
+      // elif typeinfo(is_pointer field)
+      if typeinfo(is_pointer field)
         if field != null
           map[name] = js(field)
       else
@@ -83,10 +78,10 @@ def js(value): JsonValue?
     for k, v in keys(value), values(value)
       map[k] = js(v)
     return j(map)
-  elif typeinfo(is_pointer value)
-    if value == null
-      return null
-    else
-      return js(deref(value))
+  elif typeinfo(is_iterable value)
+    var arr: array<JsonValue?>
+    for x in value
+      arr |> push <| js(x)
+    return j(arr)
   else
     return j(value)

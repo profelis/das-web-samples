@@ -42,9 +42,9 @@ def main()
   printjs(data)
 
   var tree: Tree
-  tree.children |> push(new [[Tree name="a"]])
+  tree.children |> emplace <| new [[Tree name="a"]]
   var child = new [[Tree]]
   child.name = "b"
   child.children |> emplace <| new [[Tree name="c"]]
-  tree.children |> emplace(child)
+  tree.children |> emplace <| child
   printjs(tree)
