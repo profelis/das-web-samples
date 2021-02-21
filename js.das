@@ -8,9 +8,6 @@ require daslib/json public
 require daslib/json_boost public
 
 
-def j(val: JsonValue?): JsonValue?
-  return val
-
 def j(val: bool): JsonValue?
   return new [[JsonValue value <- [[JsValue _bool = val]]]]
 
@@ -87,6 +84,9 @@ def js(value): JsonValue?
       map[k] = js(v)
     return j(map)
   elif typeinfo(is_pointer value)
-    return js(deref(value))
+    if value == null
+      return null
+    else
+      return js(deref(value))
   else
     return j(value)
