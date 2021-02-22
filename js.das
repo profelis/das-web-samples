@@ -56,10 +56,9 @@ def j(val: float): JsonValue?
 
 def js(value): JsonValue?
   static_if typeinfo(is_pointer value)
-    if value == null
-      return null
-    else
-      return js(*value)
+    return value == null ? null : js(*value)
+  elif typeinfo(is_string value)
+    return j(value)
   elif typeinfo(is_struct value)
     verify(!typeinfo(is_class value))
     var map: table<string; JsonValue?>
@@ -69,7 +68,7 @@ def js(value): JsonValue?
       // elif typeinfo(is_pointer field)
       if typeinfo(is_pointer field)
         if field != null
-          map[name] = js(field)
+          map[name] = js(*field)
       else
         map[name] = js(field)
     return j(map)

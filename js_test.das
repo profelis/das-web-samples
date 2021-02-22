@@ -36,7 +36,7 @@ def main()
   printjs(tab2)
   var foo = new Foo()
   printjs(foo)
-  var data = new [[SomeData]]
+  var data = SomeData()
   printjs(data)
   data.f = foo
   printjs(data)
