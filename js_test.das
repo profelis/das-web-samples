@@ -9,7 +9,7 @@ def printjs(a, b)
   print("{write_json(js(a, b))}\n\n")
 
 struct Foo
-  ia: array<int>
+  ia: array<int> <- [{auto 1; 2; 3; 4}]
 
 struct SomeData
   a: int = 1
@@ -38,8 +38,7 @@ def main()
   var tab2 <- {{ "bar" => [{auto[] 1; 2}] }}
   printjs(tab2)
   printjs(tab1, tab2)
-  var foo = new Foo
-  foo.ia <- [{auto[] 1; 2; 3}]
+  var foo = new Foo()
   printjs(foo)
   var data = SomeData()
   printjs(data)
