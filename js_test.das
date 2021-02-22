@@ -32,7 +32,7 @@ def main()
   printjs(12u)
   printjs(true)
   printjs([[auto[] 10u]])
-  printjs([[auto[] 10lf; 20lf]])
+  printjs([[auto[] 10.2lf; 20.4lf]])
   var tab1 <- {{ "foo" => [{auto[] "a"; "b"}] }}
   printjs(tab1)
   var tab2 <- {{ "bar" => [{auto[] 1; 2}] }}
@@ -48,9 +48,18 @@ def main()
 
   var tree: Tree
   tree.children |> emplace <| new [[Tree name="a"]]
-  var child = new [[Tree name="b"]]
+  var child = new [[Tree name="b", kind=1]]
   child.children |> emplace <| new [[Tree name="c", kind=2]]
   tree.children |> emplace <| child
   printjs(tree)
 
   printjs(js(j(1u)))
+  print(write_json(js(1, "2")))
+  print(write_json(js(1, "2", 3)))
+  print(write_json(js(1, "2", 3, 4u)))
+  print(write_json(js(1, "2", 3, 4u, 5)))
+  print(write_json(js(1, "2", 3, 4u, 5, 6)))
+  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7)))
+  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f)))
+  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9)))
+  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9, 10)))
