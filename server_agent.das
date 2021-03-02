@@ -31,14 +31,17 @@ def bytes_hr(value : uint64)
 
 
 [private]
-def start(): WebServer?
-  var res = new WebServer()
-  res.debugLogs = serverDebugLogs
+def start(): bool
+  server = new WebServer()
+  server.debugLogs = serverDebugLogs
   jsonRpc = new JsonRpcHandler()
-  jsonRpc->listen(res)
-  jsonRpc->listenUnhandled(res)
-  let success = start_server(res)
-  return success ? res : null
+  jsonRpc->listen(server)
+  jsonRpc->listenUnhandled(server)
+  let success = start_server(server)
+  if !success
+    unsafe
+      delete jsonRpc
+  return success
 
 
 [private]
@@ -50,7 +53,7 @@ def stop()
 
 class WebDebugAgent : DapiDebugAgent
   [unused_argument(agent)] def override onInstall ( agent:DebugAgent? ) : void
-    server = start()
+    start()
     if verbose
       print("start server on agent {agent} ctx: {this_context()}\n")
 
@@ -296,9 +299,8 @@ def start_debug_agent(ctx: Context)
 def start_agent(force:bool = false): bool
   if force || !has_debug_agent()
     fork_debug_agent_context(@@start_debug_agent)
-  else
-    if verbose
-      print("debug agent already exist\n")
+  elif verbose
+    print("debug agent already exists\n")
   return true
 
 
