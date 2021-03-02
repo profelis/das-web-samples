@@ -1,7 +1,7 @@
 "using strict"
 
 var jrpc = new simple_jsonrpc()
-var socket
+var socket = null
 
 var newSocketListeners = []
 
@@ -12,11 +12,12 @@ function createSocket(reconnect) {
 
   var data = ""
   socket.onmessage = async event => {
-    let text = data
-    if (typeof (event.data) == "string")
-      text += event.data
-    else
-      text += await event.data.text()
+    if (typeof (event.data) == "string") {
+      jrpc.messageHandler(event.data)
+      return
+    }
+    // binary socket
+    let text = await event.data.text()
     // split multiple json messages
     let start = 0
     for (let i = 0; i < text.length; ++i) {

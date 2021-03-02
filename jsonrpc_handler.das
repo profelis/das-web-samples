@@ -100,8 +100,8 @@ class JsonRpcMatch : Matcher
     if js is _object
       var failed = false
       (js as _object) |> find_if_exists("method") <| $(ptr)
-        if *ptr.value is _string
-          req.reqType = [[JsonRpcReqType method=*ptr.value as _string]]
+        if (*ptr).value is _string
+          req.reqType = [[JsonRpcReqType method=(*ptr).value as _string]]
           (js as _object) |> find_if_exists("params") <| $(par)
             req.params = *par
         else
@@ -118,10 +118,10 @@ class JsonRpcMatch : Matcher
 
       if req.reqType is method || req.reqType is result
         (js as _object) |> find_if_exists("id") <| $(ptr)
-          if *ptr.value is _number
-            req.id = uint64(*ptr.value as _number)
-          elif *ptr.value is _string
-            req.id = uint64(double(*ptr.value as _string))
+          if (*ptr).value is _number
+            req.id = uint64((*ptr).value as _number)
+          elif (*ptr).value is _string
+            req.id = uint64(double((*ptr).value as _string))
           else
             failed = true
         if failed // invalid id
