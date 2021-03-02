@@ -122,6 +122,13 @@ class WebDebugAgent : DapiDebugAgent
         if verbose
           print("DOWN string heap limit: {bytes_hr(strLimit)}\n")
 
+def not_in_debug_context()
+  unsafe
+    let debugAgent = addr(get_debug_agent_context())
+    if debugAgent != null && debugAgent != addr(this_context())
+      return true
+  return false
+
 def verify_in_debug_server()
   unsafe
     var debugAgent = addr(get_debug_agent_context())
@@ -133,10 +140,7 @@ def verify_in_debug_server()
 
 [private]
 def verify_not_in_debug()
-  unsafe
-    var debugAgent = addr(get_debug_agent_context())
-    verify(debugAgent != null)
-    verify(debugAgent != addr(this_context()))
+  verify(not_in_debug_context())
   return true
 
 

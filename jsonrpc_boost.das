@@ -32,10 +32,8 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
   fn.result <- new [[TypeDecl() baseType=Type autoinfer, at=at]]
 
   var qblock <- quote() <|
-    unsafe
-      let debugAgent = addr(get_debug_agent_context())
-      if debugAgent != null && debugAgent != addr(this_context())
-        add_call(func_name, func)
+    if not_in_debug_context()
+      add_call(func_name, func)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
@@ -56,10 +54,8 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   fn.result <- new [[TypeDecl() baseType=Type autoinfer, at=at]]
 
   var qblock <- quote() <|
-    unsafe
-      let debugAgent = addr(get_debug_agent_context())
-      if debugAgent != null && debugAgent != addr(this_context())
-        add_notification(func_name, func)
+    if not_in_debug_context()
+      add_notification(func_name, func)
 
   var rules : Template
   rules |> replaceVariable("func_name") <| new [[ExprConstString() at = at, value := call_fn_alias]]
