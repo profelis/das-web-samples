@@ -17,11 +17,26 @@ function createSocket(reconnect) {
       return
     }
     // binary socket
-    let text = await event.data.text()
+    let text = data
+    text += await event.data.text()
     // split multiple json messages
     let start = 0
+    let oc = 0
+    let ac = 0
+    let tryParse = false
     for (let i = 0; i < text.length; ++i) {
-      if (text[i] == "}" || text[i] == "]") {
+      let ch = text[i]
+      if (ch == "{")
+        oc += 1
+      else if (ch == '[')
+        ac += 1
+      else if (ch == '}')
+        oc -= 1
+      else if (ch == ']')
+        ac -= 1
+      tryParse ||= oc > 0 || ac > 0
+      if (tryParse && oc == 0 && ac == 0 && (ch == "}" || ch == "]")) {
+        tryParse = false
         try {
           let sub = text.substring(start, i + 1)
           JSON.parse(sub)

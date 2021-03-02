@@ -53,8 +53,21 @@ class JsonRpcMatch : Matcher
     let strLen = length(str)
     var start = 0
     var end = 0
+    var oc = 0
+    var ac = 0
+    var tryParse = false
     for idx, ch in range(strLen), str
-      if ch == '}' || ch == ']'
+      if ch == '{'
+        oc += 1
+      elif ch == '['
+        ac += 1
+      elif ch == '}'
+        oc -= 1
+      elif ch == ']'
+        ac -= 1
+      tryParse ||= oc > 0 || ac > 0
+      if tryParse && oc == 0 && ac == 0 && (ch == '}' || ch == ']')
+        tryParse = false
         if self->parseReq(str |> slice(start, idx + 1))
           start = idx + 1
           end = idx + 1
