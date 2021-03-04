@@ -65,8 +65,7 @@ class WebServer : Server
   def finalize()
     if debugLogs
       print(":{port} destroy server\n")
-    unsafe
-      delete _server
+    delete cast<Server> self
 
   def restart
     if _server != null
