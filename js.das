@@ -62,13 +62,13 @@ def js(value): JsonValue?
   elif typeinfo(is_string value)
     return j(value)
   elif typeinfo(is_struct value)
-    verify(!typeinfo(is_class value))
     var map: table<string; JsonValue?>
     apply(value) <| $(name: string; field)
-      // static_if typeinfo(is_function field)
-      //   pass // skip functions
-      // elif typeinfo(is_pointer field)
-      if typeinfo(is_pointer field)
+      static_if typeinfo(is_function field)
+        pass // skip functions
+      elif typeinfo(is_void_pointer field)
+        pass // skip void?
+      elif typeinfo(is_pointer field)
         if field != null
           map[name] = js(*field)
       else

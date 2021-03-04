@@ -11,7 +11,7 @@ def printjs(a, b)
 struct Foo
   ia: array<int> <- [{auto 1; 2; 3; 4}]
 
-struct SomeData
+class SomeData
   a: int = 1
   b: string = "1"
   c = true
@@ -40,7 +40,7 @@ def main()
   printjs(tab1, tab2)
   var foo = new Foo()
   printjs(foo)
-  var data = SomeData()
+  var data = new SomeData()
   printjs(data)
   data.f = foo
   printjs(data)
