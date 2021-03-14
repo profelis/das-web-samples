@@ -8,49 +8,49 @@ require daslib/json public
 require daslib/json_boost public
 
 
-def j(val: bool): JsonValue?
+def js(val: bool): JsonValue?
   return new [[JsonValue value <- [[JsValue _bool = val]]]]
 
-def j(val: double): JsonValue?
+def js(val: double): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = val]]]]
 
-def j(val: string): JsonValue?
+def js(val: string): JsonValue?
   return new [[JsonValue value <- [[JsValue _string = val]]]]
 
-def j(var val: table<string; JsonValue?>): JsonValue?
+def js(var val: table<string; JsonValue?>): JsonValue?
   return new [[JsonValue value <- [[JsValue _object <- val]]]]
 
-def j(var val: array<JsonValue?>): JsonValue?
+def js(var val: array<JsonValue?>): JsonValue?
   return new [[JsonValue value <- [[JsValue _array <- val]]]]
 
-def j(): JsonValue?
+def js(): JsonValue?
   return new [[JsonValue value <- [[JsValue _null = null]]]]
 
-def j(val: int8): JsonValue?
+def js(val: int8): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: uint8): JsonValue?
+def js(val: uint8): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: int16): JsonValue?
+def js(val: int16): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: uint16): JsonValue?
+def js(val: uint16): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: int): JsonValue?
+def js(val: int): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: uint): JsonValue?
+def js(val: uint): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: int64): JsonValue?
+def js(val: int64): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: uint64): JsonValue?
+def js(val: uint64): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
-def j(val: float): JsonValue?
+def js(val: float): JsonValue?
   return new [[JsonValue value <- [[JsValue _number = double(val)]]]]
 
 
@@ -58,9 +58,9 @@ def js(value): JsonValue?
   static_if typeinfo(typename value) == "json::JsonValue?" || typeinfo(typename value) == "json::JsonValue? const"
     return value
   elif typeinfo(is_pointer value)
-    return value == null ? null : js(*value)
+    return value == null ? null : _::js(*value)
   elif typeinfo(is_string value)
-    return j(value)
+    return _::js(value)
   elif typeinfo(is_struct value)
     var map: table<string; JsonValue?>
     apply(value) <| $(name: string; field)
@@ -70,47 +70,49 @@ def js(value): JsonValue?
         pass // skip void?
       elif typeinfo(is_pointer field)
         if field != null
-          map[name] = js(*field)
+          map[name] = _::js(field)
       else
-        map[name] = js(field)
-    return j(map)
+        map[name] = _::js(field)
+    return _::js(map)
   elif typeinfo(is_table value)
     var map: table<string; JsonValue?>
     for k, v in keys(value), values(value)
-      map[k] = js(v)
-    return j(map)
+      map[k] = _::js(v)
+    return _::js(map)
   elif typeinfo(is_iterable value)
     var arr: array<JsonValue?>
     for x in value
-      arr |> push <| js(x)
-    return j(arr)
+      arr |> push <| _::js(x)
+    return _::js(arr)
   else
-    return j(value)
+    print("unsupported type {typeinfo(typename value)}\n")
+    concept_assert(false, "unknown js()")
+    return null
 
 
 def js(val1; val2): JsonValue?
-  return j([{auto[] js(val1); js(val2)}])
+  return _::js([{auto[] _::js(val1); _::js(val2)}])
 
 def js(val1; val2; val3): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3)}])
 
 def js(val1; val2; val3; val4): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4)}])
 
 def js(val1; val2; val3; val4; val5): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5)}])
 
 def js(val1; val2; val3; val4; val5; val6): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5); js(val6)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5); _::js(val6)}])
 
 def js(val1; val2; val3; val4; val5; val6; val7): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5); js(val6); js(val7)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5); _::js(val6); _::js(val7)}])
 
 def js(val1; val2; val3; val4; val5; val6; val7; val8): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5); js(val6); js(val7); js(val8)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5); _::js(val6); _::js(val7); _::js(val8)}])
 
 def js(val1; val2; val3; val4; val5; val6; val7; val8; val9): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5); js(val6); js(val7); js(val8); js(val9)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5); _::js(val6); _::js(val7); _::js(val8); _::js(val9)}])
 
 def js(val1; val2; val3; val4; val5; val6; val7; val8; val9; val10): JsonValue?
-  return j([{auto[] js(val1); js(val2); js(val3); js(val4); js(val5); js(val6); js(val7); js(val8); js(val9); js(val10)}])
+  return _::js([{auto[] _::js(val1); _::js(val2); _::js(val3); _::js(val4); _::js(val5); _::js(val6); _::js(val7); _::js(val8); _::js(val9); _::js(val10)}])

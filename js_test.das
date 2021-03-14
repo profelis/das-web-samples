@@ -52,7 +52,7 @@ def main()
   tree.children |> emplace <| child
   printjs(tree)
 
-  printjs(js(j(1u)))
+  printjs(js(1u))
   print(write_json(js(1, "2")))
   print(write_json(js(1, "2", 3)))
   print(write_json(js(1, "2", 3, 4u)))
