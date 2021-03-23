@@ -6,7 +6,7 @@ require ast
 require debugapi public
 
 require daslib/ast_boost
-require daslib/template_boost
+require daslib/templates_boost
 
 require server_agent public
 require jsonrpc_handler public
