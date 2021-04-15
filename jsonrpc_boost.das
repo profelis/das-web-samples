@@ -32,7 +32,7 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
   fn.result <- new [[TypeDecl() baseType=Type autoinfer, at=at]]
 
   var qblock <- quote() <|
-    if not_in_debug_context()
+    if not_in_web_context()
       add_call(func_name, func)
 
   var rules : Template
@@ -54,7 +54,7 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   fn.result <- new [[TypeDecl() baseType=Type autoinfer, at=at]]
 
   var qblock <- quote() <|
-    if not_in_debug_context()
+    if not_in_web_context()
       add_notification(func_name, func)
 
   var rules : Template

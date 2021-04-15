@@ -10,7 +10,7 @@ require js
 [export]
 def main (fn: string)
   let main_time = stat(fn).mtime
-  print("start file {fn} at {main_time} agent:{has_debug_agent()}\n")
+  print("start file {fn} at {main_time} agent:{has_web_agent()}\n")
 
   while true
     let new_time = stat(fn).mtime
@@ -24,7 +24,7 @@ def main (fn: string)
 
 [init,export]
 def first_start()
-  if !is_in_debug_agent_creation() && !has_debug_agent()
+  if !is_in_debug_agent_creation() && !has_web_agent()
     start_agent()
 
 
