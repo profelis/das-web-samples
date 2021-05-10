@@ -11,9 +11,10 @@ require debugapi
 require jsonrpc_rtti
 require jsonrpc_handler
 require server
+require daslib/apply_in_context
 
 let
-  AGENT_NAME = "web-agent"
+  AGENT_NAME = "web_agent"
   initialStrLimit = uint64(2 * 1024 * 1024)
 
 var
@@ -147,149 +148,76 @@ def verify_not_in_web_context()
   return true
 
 
-[export]
-def _add_call_fn(name:string; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_in_web_context()
-    return
+[apply_in_context(web_agent)]
+def add_call(name:string; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
   if verbose
     print("add call `{name}`\n")
   jsonRpc->addCall(clone_string(name), new ContextFunctionRpcCall(fn, ctx))
+  return true
 
-[export]
-def add_call(name:string; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_call_fn", name, fn, ctx)
 
 [export]
 def add_call(name:string; var fn: function<(var params: JsonValue?; id: uint64): void>)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_call_fn", name, fn, this_context())
+  return add_call(name, fn, this_context())
 
-[export]
-def _add_notification(name:string; var call: ScopedRpcCall?)
-  if !verify_in_web_context()
-    return
-  if verbose
-    print("add notification `{name}`\n")
-  jsonRpc->addNotification(clone_string(name), call)
 
-[export]
-def add_notification(name:string; var call: ScopedRpcCall?)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("add_notification", name, call)
-
-[export]
-def _add_notification_fn(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context)
-  if !verify_in_web_context()
-    return
+[apply_in_context(web_agent)]
+def add_notification(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context): bool
   if verbose
     print("add notification `{name}`\n")
   jsonRpc->addNotification(clone_string(name), new ContextFunctionRpcNotification(fn, ctx))
+  return true
 
-[export]
-def add_notification(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_notification_fn", name, fn, ctx)
 
 [export]
 def add_notification(name:string; var fn: function<(var params: JsonValue?):void>)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_notification_fn", name, fn, this_context())
+  return add_notification(name, fn, this_context())
 
-[export]
-def _add_error_handler_fn(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_in_web_context()
-    return
+
+[apply_in_context]
+def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
   if verbose
     print("add error handler\n")
   jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
+  return true
 
-[export]
-def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_error_handler_fn", fn, ctx)
 
-[export]
-def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_add_error_handler_fn", fn, this_context())
-
-[export]
-def _send_response(var data: JsonValue?; id: uint64)
-  if !verify_in_web_context()
-    return
+[apply_in_context(web_agent)]
+def send_response(var data: JsonValue?; id: uint64): bool
   jsonRpc->sendResponseStr(server, write_json(data), id)
-
-[export]
-def send_response(var data: JsonValue?; id: uint64)
-  if !verify_not_in_web_context()
-    return
   unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_send_response", data, id)
-    delete data
+    if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
+      delete data
+  return true
 
-[export]
-def _send_request(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_in_web_context()
-    return
-  jsonRpc->sendRequestStr(server, clone_string(method), write_json(params), new ContextFunctionRpcCall(fn, ctx))
 
-[export]
-def send_request_typed(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context)
-  if !verify_not_in_web_context()
-    return
+[apply_in_context(web_agent)]
+def send_request_typed(method: string; var data: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
+  jsonRpc->sendRequestStr(server, clone_string(method), write_json(data), new ContextFunctionRpcCall(fn, ctx))
   unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_send_request", method, params, fn, ctx)
-    delete params
+    if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
+      delete data
+  return true
+
 
 [export]
-def send_request_typed(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>)
-  if !verify_not_in_web_context()
-    return
+def send_request_typed(method: string; var params: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>): bool
+  return send_request_typed(method, params, fn, this_context())
+
+
+[apply_in_context(web_agent)]
+def send_notification(method: string; var data: JsonValue?): bool
+  jsonRpc->sendNotificationStr(server, clone_string(method), write_json(data))
   unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_send_request", method, params, fn, this_context())
-    delete params
+    if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
+      delete data
+  return true
 
-[export]
-def _send_notification(method: string; var params: JsonValue?)
-  if !verify_in_web_context()
-    return
-  jsonRpc->sendNotificationStr(server, clone_string(method), write_json(params))
 
-[export]
-def send_notification(method: string; var params: JsonValue?)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_send_notification", method, params)
-    delete params
-
-[export]
-def _send_error(error: string; code: double; data: string; id: uint64)
-  if !verify_in_web_context()
-    return
+[apply_in_context(web_agent)]
+def send_error(error: string; code: double; data: string; id: uint64): bool
   jsonRpc->sendError(server, clone_string(error), code, empty(data) ? null : JV(data), id)
-
-[export]
-def send_error(error: string; code: double; data: string = ""; id: uint64 = 0ul)
-  if !verify_not_in_web_context()
-    return
-  unsafe
-    get_debug_agent_context(AGENT_NAME) |> invoke_in_context("_send_error", error, code, data, id)
+  return true
 
 
 def has_web_agent(): bool
