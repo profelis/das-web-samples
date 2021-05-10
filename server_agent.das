@@ -128,24 +128,12 @@ class WebDebugAgent : DapiDebugAgent
         if verbose
           print("DOWN string heap limit: {bytes_hr(strLimit)}\n")
 
+
 def not_in_web_context()
   unsafe
     if has_debug_agent_context(AGENT_NAME) && addr(get_debug_agent_context(AGENT_NAME))  != addr(this_context())
       return true
   return false
-
-def verify_in_web_context()
-  unsafe
-    verify(has_debug_agent_context(AGENT_NAME))
-    verify(addr(get_debug_agent_context(AGENT_NAME)) == addr(this_context()))
-    verify(server != null)
-    verify(jsonRpc != null)
-  return true
-
-[private]
-def verify_not_in_web_context()
-  verify(not_in_web_context())
-  return true
 
 
 [apply_in_context(web_agent)]
@@ -220,6 +208,7 @@ def send_error(error: string; code: double; data: string; id: uint64): bool
   return true
 
 
+[export]
 def has_web_agent(): bool
   return has_debug_agent_context(AGENT_NAME)
 
