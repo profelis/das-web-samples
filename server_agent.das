@@ -162,7 +162,7 @@ def add_notification(name:string; var fn: function<(var params: JsonValue?):void
   return add_notification(name, fn, this_context())
 
 
-[apply_in_context]
+[apply_in_context(web_agent)]
 def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
   if verbose
     print("add error handler\n")
