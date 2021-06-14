@@ -8,7 +8,9 @@ require js
 
 
 [export]
-def main (fn: string)
+def main ()
+  let args <- get_command_line_arguments()
+  let fn = args[1]
   let main_time = stat(fn).mtime
   print("start file {fn} at {main_time} agent:{has_web_agent()}\n")
 

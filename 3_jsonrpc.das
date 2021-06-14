@@ -8,7 +8,9 @@ require jsonrpc_args
 
 
 [export]
-def main (fn:string)
+def main ()
+  let args <- get_command_line_arguments()
+  let fn = args[1]
   var server = new WebServer()
 
   var jsonRpc = new JsonRpcHandler()

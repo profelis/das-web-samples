@@ -18,8 +18,8 @@ let
   initialStrLimit = uint64(2 * 1024 * 1024)
 
 var
-  serverDebugLogs = true
-  verbose = true
+  serverDebugLogs = false
+  verbose = false
   strLimit = initialStrLimit
 
 var

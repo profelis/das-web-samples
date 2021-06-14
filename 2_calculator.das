@@ -13,7 +13,9 @@ var counter = 0
 
 
 [export]
-def main (fn:string)
+def main ()
+  let args <- get_command_line_arguments()
+  let fn = args[1]
   var server = new WebServer()
   var plusMatch = new RegexMatch(%regex~\/inc/(.+)%%)
   server->on(plusMatch) <| @(msg: string)

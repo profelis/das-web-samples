@@ -7,7 +7,9 @@ require debug_server
 require regex_match
 
 [export]
-def main (fn:string)
+def main ()
+  let args <- get_command_line_arguments()
+  let fn = args[1]
   var server = new WebServer()
 
   var itemsMatch = new RegexMatch(%regex~\/items\/(.+)\/(.+)%%)
