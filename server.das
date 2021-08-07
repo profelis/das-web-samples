@@ -1,5 +1,4 @@
 options indenting = 2
-options remove_unused_symbols = false
 module server shared
 
 require network

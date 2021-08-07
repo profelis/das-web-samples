@@ -1,5 +1,4 @@
 options indenting = 2
-options remove_unused_symbols = false
 module jsonrpc_handler shared
 
 require strings
@@ -164,7 +163,7 @@ class JsonRpcHandler
   handlers: table<uint64; RpcCall?>
   errorHandlers: array<RpcCall?>
 
-  [private] def matchPtr()
+  def private matchPtr()
     unsafe
       return addr(match)
 

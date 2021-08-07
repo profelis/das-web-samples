@@ -1,5 +1,4 @@
 options indenting = 2
-options remove_unused_symbols = false
 options no_global_variables = false
 options persistent_heap = true
 options persistent_string_heap = true
@@ -35,8 +34,7 @@ def bytes_hr(value : uint64)
   return "{int(value)} b"
 
 
-[private]
-def start(): bool
+def private start(): bool
   server = new WebServer()
   server.debugLogs = serverDebugLogs
   jsonRpc = new JsonRpcHandler()
@@ -49,8 +47,7 @@ def start(): bool
   return success
 
 
-[private]
-def stop()
+def private stop()
   unsafe
     delete jsonRpc
     delete server
@@ -213,8 +210,8 @@ def has_web_agent(): bool
   return has_debug_agent_context(AGENT_NAME)
 
 
-[export,private,unused_argument(ctx)]
-def start_debug_agent(ctx: Context)
+[export,unused_argument(ctx)]
+def private start_debug_agent(ctx: Context)
   install_new_debug_agent(new WebDebugAgent(), AGENT_NAME)
 
 

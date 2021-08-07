@@ -1,6 +1,5 @@
 // https://github.com/GaijinEntertainment/daScript/blob/master/examples/test/base64.das
 options indenting = 2
-options remove_unused_symbols = false
 module base64 shared
 
 require strings
@@ -77,8 +76,7 @@ def base64 ( var inp : iterator<int>; linewidth = 76 )
     return false
 
 
-[private]
-def iter8to32(var inp : iterator<uint8&>)
+def private iter8to32(var inp : iterator<uint8&>)
   return <- generator<int> [[<-inp]] () <|
     for i in inp
       yield int(i)
