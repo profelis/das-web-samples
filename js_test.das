@@ -1,12 +1,12 @@
 options indenting = 2
 
-require js
+require daslib/json_boost
 
 def printjs(data)
-  print("{write_json(js(data))}\n\n")
+  print("{write_json(JV(data))}\n\n")
 
 def printjs(a, b)
-  print("{write_json(js(a, b))}\n\n")
+  print("{write_json(JV(a, b))}\n\n")
 
 struct Foo
   ia: array<int> <- [{auto 1; 2; 3; 4}]
@@ -52,13 +52,13 @@ def main()
   tree.children |> emplace <| child
   printjs(tree)
 
-  printjs(js(1u))
-  print(write_json(js(1, "2")))
-  print(write_json(js(1, "2", 3)))
-  print(write_json(js(1, "2", 3, 4u)))
-  print(write_json(js(1, "2", 3, 4u, 5)))
-  print(write_json(js(1, "2", 3, 4u, 5, 6)))
-  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7)))
-  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f)))
-  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9)))
-  print(write_json(js(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9, 10)))
+  printjs(JV(1u))
+  print(write_json(JV(1, "2")))
+  print(write_json(JV(1, "2", 3)))
+  print(write_json(JV(1, "2", 3, 4u)))
+  print(write_json(JV(1, "2", 3, 4u, 5)))
+  print(write_json(JV(1, "2", 3, 4u, 5, 6)))
+  print(write_json(JV(1, "2", 3, 4u, 5, 6lf, 7)))
+  print(write_json(JV(1, "2", 3, 4u, 5, 6lf, 7, 8f)))
+  print(write_json(JV(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9)))
+  print(write_json(JV(1, "2", 3, 4u, 5, 6lf, 7, 8f, 9, 10)))

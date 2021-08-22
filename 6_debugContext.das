@@ -4,7 +4,7 @@ require fio
 require strings
 
 require jsonrpc_boost
-require js
+require daslib/json_boost
 
 
 [export]
@@ -33,15 +33,15 @@ def first_start()
 [rpc_call(name="reverse")]
 def reverse_handler(str: string; id: uint64)
   print("{str}\n")
-  send_response(js(reverse(str)), id)
+  send_response(JV(reverse(str)), id)
 
 
 [rpc_notification(name="whatsup")]
 def whatsup_handler(param: string)
   print("whatsup!!! arg0: {param}\n")
-  send_notification("status", js(42))
-  send_notification("serverTime", js("{get_clock()}"))
-  send_request("giveHelp", js("test string"), @@help_handler)
+  send_notification("status", JV(42))
+  send_notification("serverTime", JV("{get_clock()}"))
+  send_request("giveHelp", JV("test string"), @@help_handler)
 
 
 [rpc_handler]
