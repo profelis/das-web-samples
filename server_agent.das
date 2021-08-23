@@ -61,7 +61,7 @@ class WebDebugAgent : DapiDebugAgent
         print("start server on agent {agent} ctx: {this_context()}\n")
 
   [unused_argument(agent)] def override onUninstall ( agent:DebugAgent? ) : void
-    if server != null
+    if agent == thisAgent && server != null
       // server->restart()
       stop()
       if verbose
