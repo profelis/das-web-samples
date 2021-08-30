@@ -40,7 +40,9 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
   apply_template(rules, at, qblock)
   delete rules
   unsafe
-    fn.body <- move_unquote_block(qblock)
+    var blk <- move_unquote_block(qblock)
+    blk.blockFlags ^= ExprBlockFlags isClosure
+    fn.body <- blk
 
   compiling_module() |> add_function(fn)
 
@@ -62,7 +64,9 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   apply_template(rules, at, qblock)
   delete rules
   unsafe
-    fn.body <- move_unquote_block(qblock)
+    var blk <- move_unquote_block(qblock)
+    blk.blockFlags ^= ExprBlockFlags isClosure
+    fn.body <- blk
 
   compiling_module() |> add_function(fn)
 
