@@ -226,4 +226,4 @@ def start_agent(force:bool = false): bool
 
 [export]
 def tick_agent()
-  tick_debug_agent()
+  tick_debug_agent(AGENT_NAME)
