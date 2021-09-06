@@ -38,7 +38,7 @@ class JsonRpcMatch : Matcher
 
   def clean(): void
     for it in requests
-      it.params = null // it.js point to same json data
+      it.params = null // it.js points to same json data
       delete it
     requests |> clear()
 
