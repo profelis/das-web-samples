@@ -65,7 +65,7 @@ def as_bool(js: JsonValue?): bool
   if js is _number
     return (js as _number) != 0lf
   if js is _string
-    return to_float(js as _string) != 0f
+    return length(js as _string) > 0
   return js is _object || js is _array
 
 def is_string(js: JsonValue?): bool
@@ -79,7 +79,7 @@ def as_string(js: JsonValue?): string
   if js is _bool
     return js as _bool ? "true" : "false"
   if js is _number
-    return string(float(js as _number))
+    return "{js as _number}"
   return js is _object ? "[Object object]" : js is _array ? "[Array array]" : ""
 
 def is_number(js: JsonValue?): bool
@@ -97,7 +97,6 @@ def as_double(js: JsonValue?): double
     return js as _bool ? 1lf : 0lf
   if js is _string
     return double(js as _string)
-
   return 0lf
 
 def as_float(js: JsonValue?): float
@@ -109,7 +108,6 @@ def as_float(js: JsonValue?): float
     return js as _bool ? 1f : 0f
   if js is _string
     return to_float(js as _string)
-
   return 0f
 
 def as_int(js: JsonValue?): int
@@ -121,7 +119,6 @@ def as_int(js: JsonValue?): int
     return js as _bool ? 1 : 0
   if js is _string
     return to_int(js as _string)
-
   return 0
 
 def as_uint(js: JsonValue?): uint
@@ -133,5 +130,4 @@ def as_uint(js: JsonValue?): uint
     return js as _bool ? 1u : 0u
   if js is _string
     return uint(to_float(js as _string))
-
   return 0u
