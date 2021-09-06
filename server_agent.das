@@ -26,7 +26,7 @@ var
   jsonRpc: JsonRpcHandler?
 
 
-def bytes_hr(value : uint64)
+def private bytes_hr(value : uint64)
   if value > uint64(1024 * 1024)
     return "{float(value) / (1024f * 1024f)}mb ({int(value)})"
   if value > uint64(1024)

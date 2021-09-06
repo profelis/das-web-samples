@@ -13,16 +13,16 @@ require jsonrpc_args public
 require server_agent_boost public
 
 
-def keep_args(var func)
+def private keep_args(var func)
   for arg in func.arguments
     arg.flags |= VariableFlags marked_used
 
-def keep_func_and_args(var func)
+def private keep_func_and_args(var func)
   func.flags |= FunctionFlags exports
   keep_args(func)
 
 
-def add_call_reg_func(at; call_fn_name; call_fn_alias)
+def private add_call_reg_func(at; call_fn_name; call_fn_alias)
   let fn_name = "register_{call_fn_name}_{call_fn_alias}"
   var fn <- new [[Function() at = at, atDecl = at, name := fn_name]]
   fn.flags |= FunctionFlags generated
@@ -46,7 +46,7 @@ def add_call_reg_func(at; call_fn_name; call_fn_alias)
 
   compiling_module() |> add_function(fn)
 
-def add_notification_reg_func(at; call_fn_name; call_fn_alias)
+def private add_notification_reg_func(at; call_fn_name; call_fn_alias)
   let fn_name = "register_{call_fn_name}_{call_fn_alias}"
   var fn <- new [[Function() at = at, atDecl = at, name := fn_name]]
   fn.flags |= FunctionFlags generated
@@ -71,7 +71,7 @@ def add_notification_reg_func(at; call_fn_name; call_fn_alias)
   compiling_module() |> add_function(fn)
 
 
-def transform_args(var func; is_call; var errors: das_string): bool
+def private transform_args(var func; is_call; var errors: das_string): bool
   var fn <- clone_function(func)
   fn.annotations |> clear()
   fn.name := "{genFnPrefix}{fn.name}"
@@ -145,7 +145,7 @@ def transform_args(var func; is_call; var errors: das_string): bool
   return true
 
 
-def validate_name_annotation(name_arg; var errors: das_string): bool
+def private validate_name_annotation(name_arg; var errors: das_string): bool
   if name_arg is nothing
     errors := "name is not defined"
     return false
@@ -179,7 +179,7 @@ class RpcNotificationRawAnnotation : AstFunctionAnnotation
     return true
 
 
-def validate_req_id_arg(arguments; var errors: das_string)
+def private validate_req_id_arg(arguments; var errors: das_string)
   let argsNum = arguments.length
   if argsNum < 1
     errors := "at least one argument with request id is required (req_id: uint64)"
