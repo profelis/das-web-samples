@@ -1,7 +1,6 @@
 options indenting = 2
 module jsonrpc_call shared
 
-require strings
 require daslib/json public
 
 

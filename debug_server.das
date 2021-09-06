@@ -1,7 +1,6 @@
 options indenting = 2
 module debug_server shared
 
-require network
 require fio
 
 require server public

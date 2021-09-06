@@ -3,9 +3,8 @@ module jsonrpc_rtti shared
 
 require debugapi
 require rtti
-require daslib/json
-
 require jsonrpc_call
+
 
 class ScopedRpcCall : RpcCall
   ctx: rtti::Context?

@@ -3,7 +3,6 @@ module jsonrpc_args shared
 
 require strings
 
-require daslib/json public
 require daslib/json_boost public
 
 

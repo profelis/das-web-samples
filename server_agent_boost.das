@@ -2,7 +2,6 @@ options indenting = 2
 options no_unused_function_arguments = false
 module server_agent_boost shared
 
-require ast
 require strings
 
 require daslib/ast_boost

@@ -1,10 +1,10 @@
 options indenting = 2
 module regex_match shared
 
+require server
 
 require daslib/regex
 
-require server
 
 class RegexMatch : Matcher
   matchRe : Regex
