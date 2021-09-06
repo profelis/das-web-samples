@@ -110,10 +110,10 @@ class JsonRpcMatch : Matcher
 
     if js is _object
       var failed = false
-      (js as _object) |> find_if_exists("method") <| $(ptr)
-        if (*ptr).value is _string
-          req.reqType = [[JsonRpcReqType method=(*ptr).value as _string]]
-          (js as _object) |> find_if_exists("params") <| $(par)
+      js as _object |> find_if_exists("method") <| $(ptr)
+        if *ptr is _string
+          req.reqType = [[JsonRpcReqType method=*ptr as _string]]
+          js as _object |> find_if_exists("params") <| $(par)
             req.params = *par
         else
           failed = true
@@ -123,16 +123,16 @@ class JsonRpcMatch : Matcher
         return false
 
       if req.reqType is none
-        (js as _object) |> find_if_exists("result") <| $(ptr)
+        js as _object |> find_if_exists("result") <| $(ptr)
           req.reqType = [[JsonRpcReqType result=null]]
           req.params = *ptr
 
       if req.reqType is method || req.reqType is result
-        (js as _object) |> find_if_exists("id") <| $(ptr)
-          if (*ptr).value is _number
-            req.id = uint64((*ptr).value as _number)
-          elif (*ptr).value is _string
-            req.id = uint64(double((*ptr).value as _string))
+        js as _object |> find_if_exists("id") <| $(ptr)
+          if *ptr is _number
+            req.id = uint64(*ptr as _number)
+          elif *ptr is _string
+            req.id = uint64(double(*ptr as _string))
           else
             failed = true
         if failed // invalid id
@@ -140,7 +140,7 @@ class JsonRpcMatch : Matcher
           return false
 
       if req.reqType is none
-        (js as _object) |> find_if_exists("error") <| $(ptr)
+        js as _object |> find_if_exists("error") <| $(ptr)
           req.reqType = [[JsonRpcReqType error=null]]
           req.params = *ptr
 
@@ -273,12 +273,12 @@ class JsonRpcHandler
       delete res
 
   def getError(error: string; code: double; data: JsonValue? = null; id: uint64 = 0ul): JsonValue?
-    var res = JV({{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }})
+    var res <- {{ "jsonrpc" => JV("2.0"); "error" => JV({{ "code" => JV(code); "message" => JV(error) }}) }}
     if id != 0ul
-      (res.value as _object)["id"] = JV(double(id))
+      res["id"] = JV(double(id))
     if data != null
-      (res.value as _object)["data"] = data
-    return res
+      res["data"] = data
+    return JV(res)
 
   def sendError(var server: WebServer?; error: string; code: double; data:JsonValue? = null; id: uint64 = 0ul)
     var res = self->getError(error, code, data, id)

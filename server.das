@@ -57,7 +57,7 @@ class WebServer : Server
   def override onDisconnect()
     if debugLogs
       print(":{port} client disconnected\n")
-    if length(current_string) > 0
+    if !empty(current_string)
       print("[W] :{port} unhandled req `{string(current_string)}`")
       current_string |> clear()
 

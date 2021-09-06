@@ -10,7 +10,7 @@ def get_arg(params: JsonValue?; idx: int = 0): JsonValue?
   if params == null
     return null
   if params is _array
-    let arr & = params.value as _array
+    let arr & = params as _array
     return idx < length(arr) ? arr[idx] : null
   return idx == 0 && !(params is _object) ? params : null
 
