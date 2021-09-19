@@ -134,7 +134,7 @@ def not_in_web_context()
 
 
 [apply_in_context(web_agent)]
-def add_call(name:string; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
+def add_call(name:string implicit; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context implicit): bool
   if verbose
     print("add call `{name}`\n")
   jsonRpc->addCall(clone_string(name), new ContextFunctionRpcCall(fn, ctx))
@@ -147,7 +147,7 @@ def add_call(name:string; var fn: function<(var params: JsonValue?; id: uint64):
 
 
 [apply_in_context(web_agent)]
-def add_notification(name:string; var fn: function<(var params: JsonValue?):void>; var ctx: Context): bool
+def add_notification(name:string implicit; var fn: function<(var params: JsonValue?):void>; var ctx: Context implicit): bool
   if verbose
     print("add notification `{name}`\n")
   jsonRpc->addNotification(clone_string(name), new ContextFunctionRpcNotification(fn, ctx))
@@ -160,7 +160,7 @@ def add_notification(name:string; var fn: function<(var params: JsonValue?):void
 
 
 [apply_in_context(web_agent)]
-def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
+def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context implicit): bool
   if verbose
     print("add error handler\n")
   jsonRpc->addErrorHandler(new ContextFunctionRpcCall(fn, ctx))
@@ -168,7 +168,7 @@ def add_error_handler(var fn: function<(var params: JsonValue?; id: uint64): voi
 
 
 [apply_in_context(web_agent)]
-def send_response(var data: JsonValue?; id: uint64): bool
+def send_response(var data: JsonValue? implicit; id: uint64): bool
   jsonRpc->sendResponseStr(server, write_json(data), id)
   unsafe
     if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
@@ -177,7 +177,7 @@ def send_response(var data: JsonValue?; id: uint64): bool
 
 
 [apply_in_context(web_agent)]
-def send_request_typed(method: string; var data: JsonValue?; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context): bool
+def send_request_typed(method: string implicit; var data: JsonValue? implicit; var fn: function<(var params: JsonValue?; id: uint64): void>; var ctx: Context implicit): bool
   jsonRpc->sendRequestStr(server, clone_string(method), write_json(data), new ContextFunctionRpcCall(fn, ctx))
   unsafe
     if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
@@ -191,7 +191,7 @@ def send_request_typed(method: string; var params: JsonValue?; var fn: function<
 
 
 [apply_in_context(web_agent)]
-def send_notification(method: string; var data: JsonValue?): bool
+def send_notification(method: string implicit; var data: JsonValue? implicit): bool
   jsonRpc->sendNotificationStr(server, clone_string(method), write_json(data))
   unsafe
     if addr(get_debug_agent_context(AGENT_NAME)) != addr(this_context())
@@ -200,7 +200,7 @@ def send_notification(method: string; var data: JsonValue?): bool
 
 
 [apply_in_context(web_agent)]
-def send_error(error: string; code: double; data: string; id: uint64): bool
+def send_error(error: string implicit; code: double; data: string implicit; id: uint64): bool
   jsonRpc->sendError(server, clone_string(error), code, empty(data) ? null : JV(data), id)
   return true
 
