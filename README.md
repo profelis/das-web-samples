@@ -4,7 +4,7 @@
 # usage
 
 - `dasContDev.exe N_<name>.das`
-- `node websockify.js localhost:1000 localhost:9000`
+- `node websockify.js localhost:1000 localhost:9000` or `node websockify.js :1000 127.0.0.1:9000` on macos
 - open in browser `N_<name>.html`
 
 - sample #7 (*.vue component mode) and sample #8 require local http server, for example `python -m SimpleHTTPServer` or `python -m http.server`

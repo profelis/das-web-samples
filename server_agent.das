@@ -72,6 +72,7 @@ class WebDebugAgent : DapiDebugAgent
       print("onDestroyContext `{ctx}`\n")
     if server == null
       return
+    if jsonRpc != null
     var toRemoveCalls: array<string>
     for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)
       unsafe

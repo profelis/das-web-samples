@@ -1,0 +1,58 @@
+<html>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.rawgit.com/caldwell/renderjson/master/renderjson.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
+<script src="./simple-jsonrpc-js.js"></script>
+<script src="./jsonrpc.js"></script>
+
+<body>
+
+  <div id="app">
+    <button v-on:click="getArhetypes">getArhetypes</button>
+    <pre v-html="archetypesRender"></pre>
+  </div>
+
+  <script>
+    createSocket()
+    var app5 = new Vue({
+      el: '#app',
+      data: {
+        archetypes: null,
+        archetypesRender: null,
+      },
+      methods: {
+        getArhetypes: function () {
+          jrpc.call('getArhetypes').then((data) => {
+            console.log(JSON.stringify(data, null, 2))
+            this.archetypesRender = JSON.stringify(data, null, 2)
+            this.archetypes = data
+          })
+        },
+        // getArhetypesRender: function() {
+        //   let res = renderjson(this.archetypes)
+        //   console.log(this.archetypes)
+        //   console.log(res)
+        //   return res.getInnerHTML()
+        // }
+      },
+      mounted() {
+        // jrpc.on("status", data => {
+        //   console.log("status message ", data)
+        //   app5.status = data
+        // })
+        // jrpc.on("serverTime", data => {
+        //   console.log("serverTime message ", data)
+        //   app5.serverTime = `${data}`
+        // })
+        // jrpc.on("giveHelp", data => {
+        //   console.log("giveHelp message ", data)
+        //   return "help"
+        // })
+        // setTimeout(() => jrpc.notification("whatsup"), 100)
+      }
+    })
+  </script>
+
+</body>
+
+</html>
