@@ -73,31 +73,31 @@ class WebDebugAgent : DapiDebugAgent
     if server == null
       return
     if jsonRpc != null
-    var toRemoveCalls: array<string>
-    for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)
-      unsafe
-        var scoped = reinterpret<ScopedRpcCall?>(call)
-        let currentScope & = *(scoped.ctx)
-        if addr(currentScope) == addr(ctx)
-          toRemoveCalls |> push(name)
+      var toRemoveCalls: array<string>
+      for name, call in keys(jsonRpc.calls), values(jsonRpc.calls)
+        unsafe
+          var scoped = reinterpret<ScopedRpcCall?>(call)
+          let currentScope & = *(scoped.ctx)
+          if addr(currentScope) == addr(ctx)
+            toRemoveCalls |> push(name)
 
-    for it in toRemoveCalls
-      if verbose
-        print("delete call `{it}`\n")
-      jsonRpc.calls |> erase(it)
+      for it in toRemoveCalls
+        if verbose
+          print("delete call `{it}`\n")
+        jsonRpc.calls |> erase(it)
 
-    var toRemoveNotifications: array<string>
-    for name, call in keys(jsonRpc.notifications), values(jsonRpc.notifications)
-      unsafe
-        var scoped = reinterpret<ScopedRpcCall?>(call)
-        let currentScope & = *(scoped.ctx)
-        if addr(currentScope) == addr(ctx)
-          toRemoveNotifications |> push(name)
+      var toRemoveNotifications: array<string>
+      for name, call in keys(jsonRpc.notifications), values(jsonRpc.notifications)
+        unsafe
+          var scoped = reinterpret<ScopedRpcCall?>(call)
+          let currentScope & = *(scoped.ctx)
+          if addr(currentScope) == addr(ctx)
+            toRemoveNotifications |> push(name)
 
-    for it in toRemoveNotifications
-      if verbose
-        print("delete notification `{it}`\n")
-      jsonRpc.notifications |> erase(it)
+      for it in toRemoveNotifications
+        if verbose
+          print("delete notification `{it}`\n")
+        jsonRpc.notifications |> erase(it)
 
     unsafe
       let localCtx: Context const & = this_context()

@@ -2,9 +2,9 @@ options indenting = 2
 
 require strings
 
-require debug_server
-require jsonrpc_handler
-require jsonrpc_args
+require dasweb/debug_server
+require dasweb/jsonrpc_handler
+require dasweb/jsonrpc_args
 
 
 [export]

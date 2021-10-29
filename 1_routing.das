@@ -3,8 +3,8 @@ options indenting = 2
 require daslib/regex
 require daslib/regex_boost
 
-require debug_server
-require regex_match
+require dasweb/debug_server
+require dasweb/regex_match
 
 [export]
 def main ()

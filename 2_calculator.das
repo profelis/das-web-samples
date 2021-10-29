@@ -5,8 +5,8 @@ require strings
 require daslib/regex
 require daslib/regex_boost
 
-require regex_match
-require debug_server
+require dasweb/regex_match
+require dasweb/debug_server
 
 
 var counter = 0

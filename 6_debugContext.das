@@ -2,7 +2,7 @@ options indenting = 2
 
 require fio
 require strings
-require jsonrpc_boost
+require dasweb/jsonrpc_boost
 
 
 [export]
