@@ -2,8 +2,6 @@ options persistent_heap = true
 options gc
 options log_compile_time
 
-require decs_rpc
-
 require daslib/decs_boost
 require daslib/apply
 require daslib/static_let
@@ -295,6 +293,8 @@ def test_create_delete
     commit()
     debug_dump()
 
-// options debugger
-// require daslib/debug
 
+// NB: debugger should inited before decs_rpc
+options debugger
+require daslib/debug
+require decs_rpc
