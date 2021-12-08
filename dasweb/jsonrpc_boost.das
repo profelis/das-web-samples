@@ -89,8 +89,8 @@ def private transform_args(var func; is_call; var errors: das_string): bool
     argi.arguments |> emplace_new(new [[ExprVar() at = at, name := paramsName]])
     argi.arguments |> emplace_new(new [[ExprConstInt() at = at, value = i ]])
 
-    var baseArg & = fn.arguments[i]
-    var baseArgType & = baseArg._type
+    var baseArg & = unsafe(fn.arguments[i])
+    var baseArgType & = unsafe(baseArg._type)
     if baseArgType.baseType == Type tInt
       var toValue <- new [[ExprCall() at = at, name := "as_int" ]]
       toValue.arguments |> emplace(argi)

@@ -113,11 +113,10 @@ class WebServer : Server
         if match is invalid
           continue
         found = true
-        let matchData & = match as success
         let res = invoke(handlers[idx], str)
         if length(res) > 0
           self->sendStr(res)
-        let len = matchData
+        let len = match as success
         if len >= length(str)
           current_string |> clear()
         else
@@ -129,6 +128,7 @@ class WebServer : Server
 
 
 def start_server(var server: WebServer?): bool
+  server->make_server_adapter()
   var session : smart_ptr<NetworkServer> <- gc0_restore_smart_ptr(server.restore_session)
   if session != null
     if server.debugLogs

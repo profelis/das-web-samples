@@ -1,7 +1,5 @@
 options persistent_heap = true
-options persistent_string_heap = true
 options gc
-
 options log_compile_time
 
 require decs_rpc
@@ -9,7 +7,6 @@ require decs_rpc
 require daslib/decs_boost
 require daslib/apply
 require daslib/static_let
-
 
 
 def test_query_1

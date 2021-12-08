@@ -1,7 +1,6 @@
 options indenting = 2
 options no_global_variables = false
 options persistent_heap = true
-options persistent_string_heap = true
 module server_agent shared
 
 require strings

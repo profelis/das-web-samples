@@ -10,7 +10,7 @@ def get_arg(params: JsonValue?; idx: int = 0): JsonValue?
   if params == null
     return null
   if params is _array
-    let arr & = params as _array
+    assume arr = params as _array
     return idx < length(arr) ? arr[idx] : null
   return idx == 0 && !(params is _object) ? params : null
 
@@ -19,9 +19,8 @@ def get_arg_name(params: JsonValue?; name: string): JsonValue?
   if params == null
     return null
   if params is _object
-    let obj & = params as _object
     var res : JsonValue? = null
-    obj |> find(name) <| $(sub)
+    params as _object |> find(name) <| $(sub)
       res = *sub
     return res
   return null
