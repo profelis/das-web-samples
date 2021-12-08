@@ -59,7 +59,7 @@
         <template slot="title">
           Query: {{item.hash}} <i class="header-icon el-icon-info"></i>
         </template>
-        <!-- <div>{{ item }}</div> -->
+        <div>{{ item.file }}: {{ item.line }}</div>
 
         <div v-if="item.req.length > 0"> Req:
           <el-tag v-for="it in item.req" style="margin:5px;">{{ it }}</el-tag>

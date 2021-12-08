@@ -156,7 +156,9 @@ def get_queries_rpc(str: string; id: uint64)
             "hash" => JV(q.hash);
             "req" => JV(req);
             "reqn" => JV(reqn);
-            "archetypes" => JV(archs)
+            "archetypes" => JV(archs);
+            "file" => JV(q.at.file);
+            "line" => JV(q.at.line)
         }})
     send_response(JV(res), id)
     delete res
