@@ -3,24 +3,7 @@ module server shared
 
 require network
 require strings
-
-
-typedef
-  Handler = lambda<(message: string): string>
-  MatchResult = variant<success: int; invalid: void?>
-
-class Matcher
-  def abstract match(str: string): MatchResult
-
-
-class StringMatch : Matcher
-  matchStr : string
-  def StringMatch(str: string)
-    matchStr = str
-  def override match(str: string): MatchResult
-    if str == matchStr
-      return <- [[MatchResult success = length(str) ]]
-    return <- [[MatchResult invalid = null]]
+require matcher public
 
 
 class WebServer : Server
@@ -71,9 +54,6 @@ class WebServer : Server
       var session : smart_ptr<NetworkServer>
       self->save(session)
       gc0_save_smart_ptr(restore_session, session)
-
-  def sendStrLf(str: string)
-    self->sendStr("{str}\n") // use '\n' to split multiple messages on client
 
   def sendStr(str: string)
     if debugLogs

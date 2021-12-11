@@ -6,7 +6,7 @@ var socket = null
 var newSocketListeners = []
 
 function createSocket(reconnect) {
-  socket = new WebSocket("ws://localhost:1000")
+  socket = new WebSocket("ws://localhost:9000") // or 1000
   for (let fn of newSocketListeners)
     fn.call(null, socket)
 

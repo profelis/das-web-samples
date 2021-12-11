@@ -6,7 +6,8 @@ require strings
 require daslib/json_boost public
 
 require jsonrpc_call public
-require server
+// require server
+require web_server
 
 let
   PARSE_ERROR_CODE = -32700lf

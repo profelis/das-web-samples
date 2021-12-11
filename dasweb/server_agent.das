@@ -8,7 +8,8 @@ require debugapi
 
 require jsonrpc_rtti
 require jsonrpc_handler
-require server
+// require server
+require web_server
 require daslib/apply_in_context
 
 let

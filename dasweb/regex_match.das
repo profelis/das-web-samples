@@ -1,7 +1,7 @@
 options indenting = 2
 module regex_match shared
 
-require server
+require matcher
 
 require daslib/regex
 
