@@ -2,7 +2,7 @@ options indenting = 2
 
 require strings
 
-require dasweb/debug_server
+require dasweb/server_debug
 require dasweb/jsonrpc_handler
 require bmp
 require base64

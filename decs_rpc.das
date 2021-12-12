@@ -1,5 +1,5 @@
 module decs_rpc
-require dasweb/jsonrpc_boost
+require dasweb/agent_jsonrpc_boost
 require fio
 require math
 

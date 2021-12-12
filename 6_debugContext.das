@@ -2,7 +2,7 @@ options indenting = 2
 
 require fio
 require strings
-require dasweb/jsonrpc_boost
+require dasweb/agent_jsonrpc_boost
 
 
 [export]
@@ -28,13 +28,13 @@ def first_start()
     start_agent()
 
 
-[rpc_call(name="reverse")]
+[auto_rpc_call(name="reverse")]
 def reverse_handler(str: string; id: uint64)
   print("{str}\n")
   send_response(JV(reverse(str)), id)
 
 
-[rpc_notification(name="whatsup")]
+[auto_rpc_notification(name="whatsup")]
 def whatsup_handler(param: string)
   print("whatsup!!! arg0: {param}\n")
   send_notification("status", JV(42))
@@ -42,7 +42,7 @@ def whatsup_handler(param: string)
   send_request("giveHelp", JV("test string"), @@help_handler)
 
 
-[rpc_handler]
+[auto_rpc_handler]
 def help_handler(str: string; id: uint64)
   print("giveHelp response {id} - {str}. Thanks\n")
   // send_notification("serverTime23", JV(ref_time_ticks()))
