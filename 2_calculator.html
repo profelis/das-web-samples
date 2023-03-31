@@ -10,7 +10,7 @@
 
   <p id="text"></p>
   <script>
-    const socket = new WebSocket('ws://localhost:1000')
+    const socket = new WebSocket('ws://localhost:9000')
 
     socket.addEventListener("close", function (event) {
       console.log('Socket closed ', JSON.stringify(event))

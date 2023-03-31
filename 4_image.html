@@ -8,7 +8,7 @@
   <script src="./dasweb/simple-jsonrpc-js.js"></script>
   <script>
     var jrpc = new simple_jsonrpc()
-    var socket = new WebSocket("ws://localhost:1000")
+    var socket = new WebSocket("ws://localhost:9000")
 
     socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
     jrpc.toStream = _msg => socket.send(_msg)

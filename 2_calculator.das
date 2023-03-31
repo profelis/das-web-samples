@@ -6,7 +6,7 @@ require daslib/regex
 require daslib/regex_boost
 
 require dasweb/regex_match
-require dasweb/server_debug
+require dasweb/web_server_debug
 
 
 var counter = 0

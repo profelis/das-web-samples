@@ -16,7 +16,7 @@
     var jrpc = new simple_jsonrpc()
 
     function createSocket() {
-      var socket = new WebSocket("ws://localhost:1000")
+      var socket = new WebSocket("ws://localhost:9000")
       socket.onmessage = async event => {
         let text = await event.data.text()
         // split multiple json messages in one string

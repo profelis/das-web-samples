@@ -3,7 +3,7 @@ options indenting = 2
 require daslib/regex
 require daslib/regex_boost
 
-require dasweb/server_debug
+require dasweb/web_server_debug
 require dasweb/regex_match
 
 [export]

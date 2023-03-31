@@ -9,7 +9,7 @@
   <script src="./dasweb/simple-jsonrpc-js.js"></script>
   <script>
     var jrpc = new simple_jsonrpc()
-    var socket = new WebSocket("ws://localhost:1000")
+    var socket = new WebSocket("ws://localhost:9000")
 
     //wait of notification
     jrpc.on('setTitle', function (title) {

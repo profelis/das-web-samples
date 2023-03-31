@@ -2,7 +2,7 @@ options indenting = 2
 
 require daslib/json
 
-require dasweb/server_debug
+require dasweb/web_server_debug
 require dasweb/jsonrpc_handler
 require dasweb/jsonrpc_args
 
