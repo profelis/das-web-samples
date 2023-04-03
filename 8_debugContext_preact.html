@@ -18,7 +18,7 @@
     function createSocket() {
       var socket = new WebSocket("ws://localhost:9000")
       socket.onmessage = async event => {
-        let text = await event.data.text()
+        let text = await event.data
         // split multiple json messages in one string
         let lines = text.split("\n")
         let i = 0
@@ -79,7 +79,7 @@
 
     class App {
       componentDidMount() {
-        jrpc.notification("whatsup")
+        setTimeout(() => jrpc.notification("whatsup"), 1000)
       }
       render() {
         return <p>

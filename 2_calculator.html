@@ -26,7 +26,7 @@
     })
 
     socket.addEventListener('message', async function (event) {
-      let result = await event.data.text()
+      let result = await event.data
       document.getElementById("text").innerText = "counter: " + result
       console.log('Message from server ', result)
     })
