@@ -16,7 +16,7 @@
       document.getElementById("text").innerText += "on setTitle notification: " + title + "\n"
     })
 
-    socket.onmessage = async event=> jrpc.messageHandler(await event.data.text())
+    socket.onmessage = async event=> jrpc.messageHandler(await event.data)
 
     jrpc.toStream = _msg => socket.send(_msg)
 

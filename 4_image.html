@@ -10,7 +10,7 @@
     var jrpc = new simple_jsonrpc()
     var socket = new WebSocket("ws://localhost:9000")
 
-    socket.onmessage = async event => jrpc.messageHandler(await event.data.text())
+    socket.onmessage = async event => jrpc.messageHandler(await event.data)
     jrpc.toStream = _msg => socket.send(_msg)
 
     socket.onerror = error => console.error("Error: " + error.message)

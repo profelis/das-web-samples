@@ -14,7 +14,7 @@ def first_start()
     start_agent()
 
 
-[rpc_call(name="getArchetypes")]
+[auto_rpc_call(name="getArchetypes")]
 def get_archetypes_rpc(str: string; id: uint64)
     var res: array<JsonValue?>
     for arch in decsState.allArchetypes
@@ -30,7 +30,7 @@ def get_archetypes_rpc(str: string; id: uint64)
     delete res
 
 
-[rpc_call(name="getEntities")]
+[auto_rpc_call(name="getEntities")]
 def get_entities_rpc(str: string; id: uint64)
     var res: array<JsonValue?>
     for arch in decsState.allArchetypes
@@ -57,7 +57,7 @@ def get_entities_rpc(str: string; id: uint64)
     delete res
 
 
-[rpc_call(name="getQueries")]
+[auto_rpc_call(name="getQueries")]
 def get_queries_rpc(str: string; id: uint64)
     var res: array<JsonValue?>
     for q in decsState.ecsQueries
